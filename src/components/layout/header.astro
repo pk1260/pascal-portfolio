@@ -1,0 +1,179 @@
+---
+const navigation = [
+  { label: "Home", href: "/" },
+  { label: "Work", href: "/projects" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+];
+
+const pathname = Astro.url.pathname.replace(/\/+$/, "") || "/";
+
+const isActive = (href: string) =>
+  href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+---
+
+<header class="pointer-events-none fixed inset-x-0 top-4 z-50 px-2 sm:top-6 sm:px-4">
+  <div class="pointer-events-auto mx-auto flex h-14 w-max max-w-full items-center gap-1 rounded-xl border border-border bg-surface px-2 shadow-sm sm:gap-2 sm:px-3">
+    <a
+      href="/"
+      aria-label="Pascal Kuiper — Home"
+      class="flex min-h-11 shrink-0 items-center rounded-md px-1 text-sm font-bold tracking-tight text-text-primary no-underline hover:no-underline sm:text-lg"
+    >
+      PK<span class="text-accent">.</span>
+    </a>
+
+    <div aria-hidden="true" class="mx-0.5 h-5 w-px shrink-0 bg-border sm:mx-1"></div>
+
+    <nav aria-label="Main navigation">
+      <ul class="flex items-center gap-0 sm:gap-1">
+        {navigation.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              data-nav-link
+              aria-current={isActive(item.href) ? "page" : undefined}
+              class:list={[
+                "flex min-h-11 items-center justify-center rounded-md px-1 text-[11px] font-medium whitespace-nowrap no-underline transition-colors duration-150 sm:px-2 sm:text-sm",
+                "hover:bg-surface-elevated hover:no-underline",
+                isActive(item.href)
+                  ? "text-accent-text"
+                  : "text-text-secondary hover:text-text-primary",
+              ]}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div aria-hidden="true" class="mx-0.5 h-5 w-px shrink-0 bg-border sm:mx-1"></div>
+
+    <button
+      type="button"
+      data-theme-toggle
+      aria-label="Toggle colour theme"
+      class="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-text-primary transition-colors duration-150 hover:bg-surface-elevated"
+    >
+      <svg
+        data-moon-icon
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="size-5"
+      >
+        <path d="M20.985 12.486A9 9 0 0 1 11.514 3.015a9 9 0 1 0 9.47 9.47Z" />
+      </svg>
+
+      <svg
+        data-sun-icon
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="hidden size-5"
+      >
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" />
+      </svg>
+    </button>
+  </div>
+</header>
+
+<script>
+  const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+
+  function isDarkMode(): boolean {
+    const root = document.documentElement;
+
+    if (root.classList.contains("dark")) return true;
+    if (root.classList.contains("light")) return false;
+
+    return systemTheme.matches;
+  }
+
+  function updateThemeIcon(): void {
+    const dark = isDarkMode();
+
+    const toggle = document.querySelector<HTMLButtonElement>("[data-theme-toggle]");
+
+    const moonIcon = document.querySelector<SVGElement>("[data-moon-icon]");
+
+    const sunIcon = document.querySelector<SVGElement>("[data-sun-icon]");
+
+    toggle?.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+
+    moonIcon?.classList.toggle("hidden", dark);
+    sunIcon?.classList.toggle("hidden", !dark);
+  }
+
+  function updateActiveNavigation(): void {
+    const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
+
+    document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]").forEach((link) => {
+      const href = link.getAttribute("href") || "/";
+
+      const active =
+        href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+
+      if (active) {
+        link.setAttribute("aria-current", "page");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+
+      link.classList.toggle("text-accent-text", active);
+      link.classList.toggle("text-text-secondary", !active);
+      link.classList.toggle("hover:text-text-primary", !active);
+    });
+  }
+
+  document.addEventListener("click", (event) => {
+    if (!(event.target instanceof Element)) return;
+
+    const button = event.target.closest("[data-theme-toggle]");
+
+    if (!button) return;
+
+    const nextTheme = isDarkMode() ? "light" : "dark";
+
+    document.documentElement.classList.remove("light", "dark");
+    document.documentElement.classList.add(nextTheme);
+
+    try {
+      localStorage.setItem("theme", nextTheme);
+    } catch {}
+
+    updateThemeIcon();
+  });
+
+  document.addEventListener("astro:before-swap", (event) => {
+    const currentRoot = document.documentElement;
+    const nextRoot = event.newDocument.documentElement;
+
+    nextRoot.classList.remove("light", "dark");
+
+    if (currentRoot.classList.contains("dark")) {
+      nextRoot.classList.add("dark");
+    } else if (currentRoot.classList.contains("light")) {
+      nextRoot.classList.add("light");
+    }
+  });
+
+  document.addEventListener("astro:after-swap", () => {
+    updateActiveNavigation();
+    updateThemeIcon();
+  });
+
+  systemTheme.addEventListener("change", updateThemeIcon);
+
+  updateActiveNavigation();
+  updateThemeIcon();
+</script>

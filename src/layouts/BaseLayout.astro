@@ -1,0 +1,56 @@
+---
+import Header from "../components/layout/header.astro";
+import { ClientRouter } from "astro:transitions";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = "Software engineering projects, research, and development by Pascal Kuiper.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <ClientRouter />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    <meta name="description" content={description} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <title>{title}</title>
+
+    <script is:inline>
+      (() => {
+        try {
+          const savedTheme = localStorage.getItem("theme");
+
+          if (savedTheme === "light" || savedTheme === "dark") {
+            document.documentElement.classList.add(savedTheme);
+          }
+        } catch {}
+      })();
+    </script>
+  </head>
+
+  <body class="min-h-screen bg-background text-text-primary">
+    <a
+      href="#main-content"
+      class="sr-only focus:fixed focus:top-3 focus:left-3 focus:z-100 focus:h-auto focus:w-auto focus:overflow-visible focus:rounded-md focus:bg-surface focus:px-4 focus:py-3 focus:text-text-primary focus:not-sr-only"
+    ></a>
+
+    <Header transition:persist />
+
+    <main id="main-content" tabindex="-1" transition:animate="none" class="min-h-screen pt-28">
+      <slot />
+    </main>
+  </body>
+</html>
