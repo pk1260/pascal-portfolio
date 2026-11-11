@@ -1,0 +1,94 @@
+---
+import { Image } from "astro:assets";
+import tokyoImage from "../../assets/hero/tokyo-night.webp";
+---
+
+<section
+  aria-labelledby="hero-title"
+  class="relative isolate flex min-h-svh items-center overflow-hidden bg-[#0B0B0B] text-[#F5F5F5]"
+>
+  <Image
+    src={tokyoImage}
+    alt=""
+    loading="eager"
+    fetchpriority="high"
+    widths={[640, 960, 1280, 1920, 2400]}
+    sizes="100vw"
+    class="absolute inset-0 -z-20 h-full w-full object-cover object-[68%_center]"
+  />
+
+  <div
+    aria-hidden="true"
+    class="absolute inset-0 -z-10 bg-linear-to-r from-[#050709]/85 via-[#050709]/55 to-[#050709]/20"
+  ></div>
+
+  <div class="container-page relative z-10 py-36 md:py-44">
+    <div class="max-w-3xl">
+      <h1
+        id="hero-title"
+        class="text-[clamp(3.2rem,9vw,8rem)] leading-[0.9] font-black tracking-[-0.055em]"
+      >
+        <span class="block">PASCAL</span>
+        <span class="block">
+          KUIPER<span class="text-[#FC7E00]">.</span>
+        </span>
+      </h1>
+
+      <p class="mt-6 text-sm font-medium tracking-[0.12em] text-[#FC7E00] md:text-lg">
+        ソフトウェアエンジニア
+      </p>
+
+      <div class="mt-7 border-l-[3px] border-[#FC7E00] pl-5">
+        <h2 class="text-[clamp(1.65rem,4vw,3.4rem)] leading-[1.05] font-bold tracking-tight">
+          I AM A<br />
+          SOFTWARE ENGINEER.
+        </h2>
+      </div>
+
+      <p class="mt-5 text-xs font-medium tracking-[0.12em] text-[#F5F5F5] md:text-sm">
+        DRIVEN. / A DESIGNER. / A PROFESSIONAL.
+      </p>
+
+      <div class="mt-9 flex flex-wrap items-center gap-5">
+        <a
+          href="/projects"
+          class="inline-flex min-h-11 items-center justify-center rounded-sm bg-[#FC7E00] px-6 py-3 text-sm font-bold text-[#111111] no-underline hover:bg-[#FF9A33] hover:no-underline"
+        >
+          VIEW MY WORK
+          <span aria-hidden="true" class="ml-3">
+            ↗
+          </span>
+        </a>
+
+        <a
+          href="/about"
+          class="inline-flex min-h-11 items-center border-b border-[#F5F5F5] px-1 text-sm font-medium text-[#F5F5F5] no-underline hover:border-[#FC7E00] hover:no-underline"
+        >
+          ABOUT ME
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div
+    aria-hidden="true"
+    class="absolute top-28 left-5 hidden text-xs font-medium tracking-widest text-white lg:block"
+  >
+    TOKYO / JAPAN
+  </div>
+
+  <div
+    aria-hidden="true"
+    class="absolute top-1/2 right-6 hidden -translate-y-1/2 [writing-mode:vertical-rl] xl:block"
+  >
+    <span class="text-xs tracking-[0.2em] text-white">DEVELOPMENT / RESEARCH / DESIGN</span>
+  </div>
+
+  <a
+    href="#selected-work"
+    class="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 text-xs tracking-[0.2em] text-white no-underline hover:no-underline md:flex"
+  >
+    SCROLL
+    <span aria-hidden="true" class="h-10 w-px bg-[#FC7E00]"></span>
+  </a>
+</section>

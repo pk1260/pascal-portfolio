@@ -6,16 +6,18 @@ import "../styles/global.css";
 interface Props {
   title: string;
   description?: string;
+  fullBleed?: boolean;
 }
 
 const {
   title,
   description = "Software engineering projects, research, and development by Pascal Kuiper.",
+  fullBleed = false,
 } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" transition:animate="none">
   <head>
     <ClientRouter />
     <meta charset="UTF-8" />
@@ -47,9 +49,14 @@ const {
       class="sr-only focus:fixed focus:top-3 focus:left-3 focus:z-100 focus:h-auto focus:w-auto focus:overflow-visible focus:rounded-md focus:bg-surface focus:px-4 focus:py-3 focus:text-text-primary focus:not-sr-only"
     ></a>
 
-    <Header transition:persist />
+    <Header transition:name="site-header" transition:persist transition:animate="none" />
 
-    <main id="main-content" tabindex="-1" transition:animate="none" class="min-h-screen pt-28">
+    <main
+      id="main-content"
+      tabindex="-1"
+      transition:animate="none"
+      class:list={["min-h-screen", fullBleed ? "" : "pt-28"]}
+    >
       <slot />
     </main>
   </body>

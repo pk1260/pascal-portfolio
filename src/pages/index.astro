@@ -1,11 +1,12 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/home/hero.astro";
 ---
 
-<BaseLayout title="Pascal Kuiper | Software Engineer">
-  <section class="container-page py-16">
-    <h1 class="text-4xl font-bold tracking-tight text-text-primary">Pascal Kuiper</h1>
+<BaseLayout title="Pascal Kuiper | Software Engineer" fullBleed>
+  <Hero />
 
-    <p class="mt-4 text-text-secondary">Software Engineer | Full-Stack Developer | Home</p>
+  <section id="selected-work" class="container-page py-24">
+    <h2 class="text-3xl font-bold text-text-primary">Selected Work</h2>
   </section>
 </BaseLayout>
