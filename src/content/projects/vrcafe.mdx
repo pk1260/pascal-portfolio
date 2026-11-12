@@ -1,0 +1,64 @@
+---
+title: "VRcafe Haarlem Website"
+description: "A production rebuild of VRcafe Haarlem's WordPress/Elementor website using Astro, with measured improvements in mobile performance and a comprehensive SEO audit."
+technologies:
+  - Astro
+  - TypeScript
+  - Tailwind CSS
+  - Node.js
+  - Express
+  - Python
+  - FFmpeg
+  - Playwright
+  - GitHub Actions
+  - Lighthouse
+  - Mailjet
+  - PM2
+category: web
+status: completed
+order: 3
+cover: ../../assets/projects/vrcafe/vrcafe-mockup.png
+---
+
+# VRcafe Haarlem Website
+
+A complete rebuild of the website for VRcafe Haarlem, a virtual reality venue. The original website used WordPress and Elementor and suffered from slow loading times, particularly on mobile. Some pages took more than 16 seconds to display their main content.
+
+I rebuilt the website using **Astro** with a **Node.js/Express** backend, preserving the venue's visual identity while improving the underlying architecture and performance. The new website is **live in production**. Its forms, booking integration, media processing, testing, and deployment workflow were implemented as part of the completed project.
+
+## Highlights
+
+- **Static site generation in Astro**, selected after comparing SSG, SSR, and ISR in terms of loading performance and server resource usage.
+- **Atomic Design component structure**, from shared layouts to reusable buttons and typography.
+- **JSON-driven content**, validated with JSON schemas and typed with TypeScript, allowing page variants such as business outings and children's parties to share templates.
+- **Embedded booking integration**, with email and phone fallbacks if the booking iframe fails to load.
+- **Forms with live validation**, delivered through Mailjet.
+- **Python and FFmpeg media pipeline** converting images to WebP and videos to WebM, retaining a conversion only when it saves at least 30% of the file size.
+- **Lazy loading and explicit media dimensions** to reduce unnecessary transfers and prevent layout shifts.
+- **Responsive interface** built with Tailwind CSS.
+- **Automated CI/CD with GitHub Actions**, including Playwright tests, Astro builds, deployment of the client and server to a VPS, and PM2 restarts.
+
+## Research
+
+I compared the original website with the **final production implementation** using repeated Lighthouse and PageSpeed Insights measurements across eight representative pages on mobile and desktop. The results were evaluated as averages rather than relying on a single run.
+
+- **Average mobile Largest Contentful Paint improved by 78%**, from 8.96 s to 1.95 s. Speed Index improved by 62%, and First Contentful Paint by 55%.
+- **Lazy loading alone reduced LCP by 28%** and brought Total Blocking Time from 775 ms to approximately 1 ms in the corresponding tests.
+- **Media processing reduced the total media payload by approximately 70%**, from 3,561 MB to 1,054 MB across more than 17,000 files. JPEG files achieved average savings of 81%.
+- **An audit of the original site's SEO** identified 123 pages, including 75 with the same meta description, and missing sitemap, robots.txt, and structured data.
+- **Desktop results were mixed:** First Contentful Paint improved by 30% and Speed Index by 26%, while Largest Contentful Paint worsened by 29%. This highlighted the need to inspect above-the-fold content rather than treat every metric as an automatic success.
+
+These figures describe the measured test results; they are not claims about every visitor's real-world experience.
+
+## What I Learned
+
+- **One measurement is not a result.** Lighthouse runs varied enough that I switched to repeated measurements, averages, and automated collection using batch scripts and Python.
+- **The fastest rendering strategy is not always the best architectural choice.** SSR was slightly faster in some tests, but SSG suited a website with approximately 98% static content. ISR remained a potential option for a future blog.
+- **Not every asset benefits from conversion.** Some AVIF files were already efficient, so the media pipeline compared output sizes and preserved the original when savings were too small.
+- **Lab measurements have limits.** Lighthouse tests provide a controlled comparison, while real-user monitoring would be needed to confirm performance for actual visitors.
+- **Negative results are useful.** The worse desktop LCP prompted closer investigation into what the browser was loading above the fold.
+- **Testing benefits from explicit planning.** Although automated checks ran in CI, the project showed me why a formal test plan and coverage reporting should be established from the start.
+
+## Status
+
+**Completed and live in production.** The website, backend integrations, automated testing, and deployment pipeline were implemented and delivered. The performance comparisons above were made using the final production implementation.

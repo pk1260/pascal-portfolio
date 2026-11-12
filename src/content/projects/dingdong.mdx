@@ -1,0 +1,102 @@
+---
+title: "Dingdong"
+description: "Room preview web application and deep-link integration for Dingdong, built with Next.js, Cloudflare Workers, Django, and Expo, with a documented handover of final end-to-end validation."
+technologies:
+  - Next.js
+  - TypeScript
+  - Cloudflare Workers
+  - Tailwind CSS
+  - Zod
+  - Django REST API
+  - Expo
+  - Expo Router
+  - AppsFlyer OneLink
+  - Detour
+  - Jest
+  - GitHub Actions
+category: web
+status: completed
+order: 2
+cover: ../../assets/projects/dingdong/dingdong-mockup.png
+---
+
+# Dingdong Web Preview & In-App Deep Linking
+
+As part of my graduation internship at **Dingdong**, a student housing platform, I developed a **room preview web application** and implemented deep-link integration in the existing Expo mobile app.
+
+The web preview allows someone opening a shared room link to see the listing before installing the app. The architecture was designed to guide users from the preview into the corresponding room in the mobile application, including journeys involving an app-store installation.
+
+The **Detour integration was implemented**, but the complete end-to-end deep-link journey had **not yet been verified** at the time of handover. Final integration and device-level testing were deliberately transferred to the incoming development team.
+
+## Highlights
+
+- **Room-specific preview pages** with photos, details, tags, and a map, deployed using Next.js on Cloudflare Workers.
+- **Image gallery consistent with the mobile app**, with fallbacks across room photos, group pictures, and house photos to handle listings with incomplete media.
+- **Privacy-aware map presentation** displaying an approximate area rather than the room's exact address.
+- **Overview page** for active room listings.
+- **Deep-link call to action** constructing an AppsFlyer OneLink URL containing the room's opaque `public_code`.
+- **Implemented Detour integration in Expo**, including a `DetourProvider` for deferred links, a `+native-intent` entry point for incoming links, and a `DetourBridge` designed to pass them to the existing `DeepLinkStore`.
+- **Deep-link platform configuration work**, including Detour-related associated-domain and intent-filter settings without removing the existing AppsFlyer configuration.
+- **SEO implementation**, including Open Graph metadata, structured data, sitemap, robots rules, and the exclusion of inactive listings from indexing.
+- **Separate development and production Cloudflare Workers** with their own secrets and domains.
+- **CI pipeline**, including tests, build validation, deployment jobs, ESLint, and Jest coverage thresholds.
+
+## Architecture
+
+```text
+Shared room link
+  → dingdong-kamers.nl/aanbod/rooms/[public_code]
+  → Next.js room preview on Cloudflare Workers
+  → Django REST API (single-room endpoint, API key)
+  → Open-in-app CTA / AppsFlyer OneLink
+  → Intended destination: corresponding room in the mobile app
+```
+
+Room data is validated with **Zod** at the API boundary and mapped to an internal model so that unexpected API changes can surface as validation errors rather than silently producing malformed pages.
+
+The app-side integration brings together three deep-link entry paths:
+
+- **AppsFlyer OneLink** for attribution and installation-related journeys.
+- **Detour** for supported incoming links and deferred-link handling.
+- **`useLinkHandler`** as an existing custom-URI fallback.
+
+The integration was designed to direct these paths into the existing **`DeepLinkStore`** and **`DeepLinkCoordinator`**, avoiding a separate routing implementation for each provider. The complete journey across devices and installation states still required end-to-end verification.
+
+## What I Learned
+
+- **Build-time versus runtime configuration.** Variables prefixed with `NEXT_PUBLIC_` are embedded during the build. I traced an incorrect OneLink destination pointing to `localhost` to the interaction between local and production environment variables.
+- **Cloudflare deployment constraints.** Worker custom domains need the appropriate Cloudflare zone configuration, and image optimization behaved differently on Workers than in local development.
+- **Deep linking is an end-to-end system.** OneLink templates, Universal Links, App Links, store redirects, and app routing can fail independently. Testing with an internal beta already installed can obscure the actual new-user journey.
+- **Integrating with existing architecture.** The goal was to add Detour without replacing the application's established deep-link coordination and routing layers.
+- **Separating implementation from verification.** An unexplained `item not found` result remained during testing. Without the required logs and clean-device verification, I documented the limitation rather than claiming that the entire journey worked.
+- **Time-zone consistency in delta sync.** I investigated a `since` filter that appeared to omit a room and traced the discrepancy to mixing UTC and local timestamps, recommending consistent UTC normalization.
+- **Handling data-driven UI edge cases**, including listings with a single photo, missing group pictures, or inactive status.
+- **Isolating deployment environments**, with separate Workers, environment-specific secrets, and safer deployment configuration.
+
+## Status
+
+**Completed — graduation internship.** The agreed work was delivered with technical documentation and a handover to the incoming team.
+
+### Delivered
+
+- Room preview web application, gallery, and room overview.
+- Cloudflare Workers environment and deployment configuration.
+- CI pipeline and associated checks.
+- `.well-known` association files for Universal Links and App Links.
+- Detour integration code in the Expo application.
+- Technical documentation and handover instructions.
+
+### Handed over for follow-up
+
+- Mount or verify the `DetourBridge` in the app layout as required by the final integration.
+- Investigate the remaining `item not found` error on test links.
+- Verify the complete link journey on clean physical devices, including installation flows.
+- Finalize or verify the `dingdong-kamers.nl` associated-domain and intent-filter configuration in the app.
+- Replace the hardcoded share link in the Django backend with a dynamic value.
+- Add further unit tests for `src/lib`.
+
+The internship assignment was completed, but **the Detour flow was not claimed to be fully end-to-end validated** at the time of handover.
+
+## Credits
+
+Maps by [Google Maps Platform](https://developers.google.com/maps) · Deep linking with [AppsFlyer OneLink](https://www.appsflyer.com/) and [Detour by Software Mansion](https://docs.swmansion.com/detour/) · Hosting on [Cloudflare Workers](https://workers.cloudflare.com/)

@@ -1,0 +1,55 @@
+---
+title: "FlightCompanion"
+description: "An offline-first flight tracker built with C++23 and Qt 6, combining local flight storage, synchronization, destination weather, and measured storage and refresh strategies."
+technologies:
+  - C++23
+  - Qt 6
+  - SQLite
+  - CMake
+  - KLM Flight Status API
+  - Open-Meteo API
+category: desktop
+status: completed
+order: 1
+cover: ../../assets/projects/flightcompanion/flightcompanion-mockup.png
+---
+
+# FlightCompanion
+
+**FlightCompanion** is a completed offline-first desktop application built with **C++23** and **Qt 6**. It lets users look up and save flights while keeping their information available when an internet connection is limited or unavailable.
+
+The application reads saved flight data from local storage and uses network requests to update that data when connectivity is available. Alongside the implementation, I carried out research and benchmarks within the completed application to compare storage approaches and synchronization strategies.
+
+## Highlights
+
+- **Flight lookup and saving** using the KLM Flight Status API.
+- **Offline access to saved flights**, including a clear indication when displayed information comes from local storage.
+- **Offline route map** drawn using a bundled world map, without depending on a network connection for the map itself.
+- **Destination weather at the expected arrival time**, retrieved through Open-Meteo.
+- **Status-based refresh scheduling** designed around a limit of 100 API requests per day.
+- **Automatic synchronization** when the connection becomes available again.
+
+## Research
+
+I researched how to keep flight information available and sufficiently up to date with limited network access. This involved a storage benchmark and a simulated travel day using the completed application.
+
+- **SQLite updated a single flight up to 85× faster than JSON** in the measured benchmark, where the JSON approach rewrote the entire file after a change.
+- **Status-based refreshing used 29% fewer requests** than refreshing every five minutes in the measured scenario, while maintaining the same observed freshness.
+- **Checking connectivity before making a request** reduced the measured offline wait from 14.5 seconds to effectively immediate feedback.
+
+The figures reflect the benchmark conditions and simulated scenarios, rather than guaranteed performance in every environment.
+
+## What I Learned
+
+- **Designing around interfaces** so storage implementations and synchronization strategies can be swapped and compared fairly.
+- **Writing asynchronous network operations** while keeping application state consistent as the user continues working.
+- **Managing memory and debugging C++/Qt applications**, including tracing a crash that occurred only in Release builds.
+- **Questioning measurements**, especially after identifying an artefact that initially made one strategy appear better than it was.
+
+## Status
+
+**Completed.** Both the desktop application and its associated research were finished. The features listed above were implemented and working, and the research findings were measured as part of the project.
+
+## Credits
+
+Flight data from the [Air France-KLM Developer Portal](https://developer.airfranceklm.com) · Weather data by [Open-Meteo](https://open-meteo.com/) (CC BY 4.0) · World map from [Natural Earth](https://www.naturalearthdata.com/)
