@@ -1,0 +1,117 @@
+---
+const phrases = ["A SOFTWARE ENGINEER.", "DRIVEN.", "A DESIGNER.", "A PROFESSIONAL."];
+---
+
+<span data-typewriter class="typewriter">
+  <span data-typewriter-text aria-hidden="true">
+    {phrases[0]}
+  </span>
+  <span data-typewriter-cursor aria-hidden="true" class="typewriter-cursor"></span>
+  <span class="sr-only">A software engineer, driven, a designer, and a professional.</span>
+</span>
+
+<style>
+  .typewriter {
+    display: block;
+  }
+
+  .typewriter-cursor {
+    display: inline-block;
+    width: 0.065em;
+    height: 0.85em;
+    margin-left: 0.1em;
+    background-color: #fc7e00;
+    vertical-align: -0.08em;
+    animation: cursor-blink 1s steps(1) infinite;
+  }
+
+  @keyframes cursor-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .typewriter-cursor {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const phrases = ["A SOFTWARE ENGINEER.", "DRIVEN.", "A DESIGNER.", "A PROFESSIONAL."];
+
+  let cleanup: (() => void) | undefined;
+
+  function initializeTypewriter() {
+    cleanup?.();
+
+    const container = document.querySelector<HTMLElement>("[data-typewriter]");
+    const text = container?.querySelector<HTMLElement>("[data-typewriter-text]");
+
+    if (!text) return;
+
+    const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    let phraseIndex = 0;
+    let characterIndex = 0;
+    let deleting = false;
+    let timeout: ReturnType<typeof setTimeout>;
+
+    function tick() {
+      const phrase = phrases[phraseIndex];
+
+      if (deleting) {
+        characterIndex--;
+      } else {
+        characterIndex++;
+      }
+
+      text!.textContent = phrase.slice(0, characterIndex);
+
+      if (!deleting && characterIndex === phrase.length) {
+        deleting = true;
+        timeout = setTimeout(tick, 2200);
+        return;
+      }
+
+      if (deleting && characterIndex === 0) {
+        deleting = false;
+        phraseIndex = (phraseIndex + 1) % phrases.length;
+        timeout = setTimeout(tick, 350);
+        return;
+      }
+
+      timeout = setTimeout(tick, deleting ? 45 : 75);
+    }
+
+    function start() {
+      clearTimeout(timeout);
+
+      phraseIndex = 0;
+      characterIndex = 0;
+      deleting = false;
+
+      if (motionPreference.matches) {
+        text!.textContent = phrases[0];
+        return;
+      }
+
+      text!.textContent = "";
+      timeout = setTimeout(tick, 250);
+    }
+
+    motionPreference.addEventListener("change", start);
+    start();
+
+    cleanup = () => {
+      clearTimeout(timeout);
+      motionPreference.removeEventListener("change", start);
+    };
+  }
+
+  document.addEventListener("astro:page-load", initializeTypewriter);
+  document.addEventListener("astro:before-swap", () => cleanup?.());
+
+  initializeTypewriter();
+</script>

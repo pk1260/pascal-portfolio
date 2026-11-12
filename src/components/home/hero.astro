@@ -1,6 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import tokyoImage from "../../assets/hero/tokyo-night.webp";
+import Typewriter from "./typewriter.astro";
 ---
 
 <section
@@ -26,6 +27,7 @@ import tokyoImage from "../../assets/hero/tokyo-night.webp";
     <div class="max-w-3xl">
       <h1
         id="hero-title"
+        data-hero-reveal="1"
         class="text-[clamp(3.2rem,9vw,8rem)] leading-[0.9] font-black tracking-[-0.055em]"
       >
         <span class="block">PASCAL</span>
@@ -34,22 +36,21 @@ import tokyoImage from "../../assets/hero/tokyo-night.webp";
         </span>
       </h1>
 
-      <p class="mt-6 text-sm font-medium tracking-[0.12em] text-[#FC7E00] md:text-lg">
+      <p
+        class="mt-6 text-sm font-medium tracking-[0.12em] text-[#FC7E00] md:text-lg"
+        data-hero-reveal="2"
+      >
         ソフトウェアエンジニア
       </p>
 
-      <div class="mt-7 border-l-[3px] border-[#FC7E00] pl-5">
+      <div class="mt-7 border-l-[3px] border-[#FC7E00] pl-5" data-hero-reveal="3">
         <h2 class="text-[clamp(1.65rem,4vw,3.4rem)] leading-[1.05] font-bold tracking-tight">
-          I AM A<br />
-          SOFTWARE ENGINEER.
+          <span class="block">I AM</span>
+          <Typewriter />
         </h2>
       </div>
 
-      <p class="mt-5 text-xs font-medium tracking-[0.12em] text-[#F5F5F5] md:text-sm">
-        DRIVEN. / A DESIGNER. / A PROFESSIONAL.
-      </p>
-
-      <div class="mt-9 flex flex-wrap items-center gap-5">
+      <div class="mt-9 flex flex-wrap items-center gap-5" data-hero-reveal="2">
         <a
           href="/projects"
           class="inline-flex min-h-11 items-center justify-center rounded-sm bg-[#FC7E00] px-6 py-3 text-sm font-bold text-[#111111] no-underline hover:bg-[#FF9A33] hover:no-underline"
@@ -84,6 +85,14 @@ import tokyoImage from "../../assets/hero/tokyo-night.webp";
     <span class="text-xs tracking-[0.2em] text-white">DEVELOPMENT / RESEARCH / DESIGN</span>
   </div>
 
+  <div
+    aria-hidden="true"
+    lang="ja"
+    class="pointer-events-none absolute right-12 bottom-12 z-10 hidden text-[clamp(6rem,12vw,12rem)] leading-none font-black tracking-[-0.08em] text-white/20 xl:block"
+  >
+    東京
+  </div>
+
   <a
     href="#selected-work"
     class="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 text-xs tracking-[0.2em] text-white no-underline hover:no-underline md:flex"
@@ -92,3 +101,43 @@ import tokyoImage from "../../assets/hero/tokyo-night.webp";
     <span aria-hidden="true" class="h-10 w-px bg-[#FC7E00]"></span>
   </a>
 </section>
+
+<style>
+  [data-hero-reveal] {
+    animation: hero-reveal 650ms ease-out both;
+  }
+
+  [data-hero-reveal="1"] {
+    animation-delay: 100ms;
+  }
+
+  [data-hero-reveal="2"] {
+    animation-delay: 220ms;
+  }
+
+  [data-hero-reveal="3"] {
+    animation-delay: 340ms;
+  }
+
+  [data-hero-reveal="4"] {
+    animation-delay: 460ms;
+  }
+
+  @keyframes hero-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-hero-reveal] {
+      animation: none;
+    }
+  }
+</style>
