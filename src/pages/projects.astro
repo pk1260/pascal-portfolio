@@ -1,11 +1,32 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import ProjectCard from "../components/projects/project-card.astro";
+
+const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
 ---
 
-<BaseLayout title="Pascal Kuiper | Software Engineer">
-  <section class="container-page py-16">
-    <h1 class="text-4xl font-bold tracking-tight text-text-primary">Pascal Kuiper</h1>
+<BaseLayout title="Work | Pascal Kuiper">
+  <main class="container-page pb-24 md:pb-32">
+    <header class="mb-12">
+      <div class="mb-6 flex items-center gap-3 text-xs font-medium uppercase tracking-[0.18em] text-secondary">
+        <span class="h-0.5 w-8 bg-accent"></span>
+        <span>Portfolio / Work</span>
+      </div>
 
-    <p class="mt-4 text-text-secondary">Software Engineer | Full-Stack Developer | Projects</p>
-  </section>
+      <h1 class="text-4xl font-semibold tracking-tight text-text-primary sm:text-5xl lg:text-6xl">
+        Selected projects<span class="text-accent">.</span>
+      </h1>
+
+      <p class="mt-6 max-w-2xl text-lg leading-relaxed text-secondary">
+        A collection of software projects, technical research, and things I've built.
+      </p>
+    </header>
+
+    <section aria-label="Projects" class="grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2">
+      {projects.map((project) => (
+        <ProjectCard project={project} source="work" />
+      ))}
+    </section>
+  </main>
 </BaseLayout>

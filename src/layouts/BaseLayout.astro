@@ -58,3 +58,15 @@ const {
     </main>
   </body>
 </html>
+
+<script>
+  document.addEventListener("click", (event) => {
+    if (!(event.target instanceof Element)) return;
+
+    const link = event.target.closest<HTMLAnchorElement>("a[data-project-source]");
+
+    if (!link) return;
+
+    sessionStorage.setItem("projectSource", link.dataset.projectSource ?? "work");
+  });
+</script>
