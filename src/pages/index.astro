@@ -2,27 +2,17 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/home/hero.astro";
 import SelectedWork from "../components/home/selected-work.astro";
+import SectionHeading from "../components/ui/section-heading.astro";
 ---
 
 <BaseLayout title="Pascal Kuiper | Software Engineer" fullBleed>
   <Hero />
-  <section id="selected-work" class="container-page py-24">
-    <div class="mb-10">
-      <div class="mb-3 flex items-center gap-3">
-        <span aria-hidden="true" class="h-0.5 w-8 bg-accent"></span>
-        <span class="text-xs font-semibold tracking-[0.15em] text-text-secondary uppercase">
-          SELECTED WORK
-        </span>
-      </div>
-
-      <h2 class="text-3xl font-bold tracking-tight text-text-primary md:text-4xl">
-        Projects I've built<span class="text-accent">.</span>
-      </h2>
-
-      <p class="mt-3 text-sm text-text-secondary">
-        A selection of software projects and technical research.
-      </p>
-    </div>
+  <section id="selected-work" class="container-page py-12 lg:py-24">
+    <SectionHeading
+      eyebrow="Selected Work"
+      title="Projects I've built"
+      description="A selection of software projects and technical research."
+    />
     <SelectedWork />
   </section>
 </BaseLayout>
