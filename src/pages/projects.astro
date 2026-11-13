@@ -2,26 +2,31 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 import ProjectCard from "../components/projects/project-card.astro";
+import SectionHeading from "../components/ui/section-heading.astro";
 
 const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
+
+const pageHeading = {
+  eyebrow: "Portfolio / Work",
+  title: "Selected work",
+  description: "A collection of software projects, technical research, and things I've built.",
+};
 ---
 
 <BaseLayout title="Work | Pascal Kuiper">
   <main class="container-page pb-24 md:pb-32">
-    <header class="mb-12">
-      <div class="mb-6 flex items-center gap-3 text-xs font-medium uppercase tracking-[0.18em] text-secondary">
-        <span class="h-0.5 w-8 bg-accent"></span>
-        <span>Portfolio / Work</span>
-      </div>
+    <SectionHeading
+      eyebrow={pageHeading.eyebrow}
+      title={pageHeading.title}
+      description={pageHeading.description}
+      level="h1"
+    />
 
-      <h1 class="text-4xl font-semibold tracking-tight text-text-primary sm:text-5xl lg:text-6xl">
-        Selected projects<span class="text-accent">.</span>
-      </h1>
-
-      <p class="mt-6 max-w-2xl text-lg leading-relaxed text-secondary">
-        A collection of software projects, technical research, and things I've built.
-      </p>
-    </header>
+    <div class="mb-8 flex items-center justify-between border-b border-border pb-4">
+      <span class="text-xs font-medium tracking-widest text-secondary">
+        {String(projects.length).padStart(2, "0")} PROJECTS
+      </span>
+    </div>
 
     <section aria-label="Projects" class="grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2">
       {projects.map((project) => (
