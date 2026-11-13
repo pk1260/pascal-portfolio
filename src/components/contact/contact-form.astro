@@ -83,9 +83,10 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
   <button
     id="contact-submit"
     type="submit"
+    disabled
     class="inline-flex items-center gap-3 rounded-sm bg-accent px-6 py-3 text-sm font-semibold text-[#111111] transition-opacity hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-50"
   >
-    Send message
+    <span id="contact-submit-label">Send message</span>
     <span aria-hidden="true">↗</span>
   </button>
 
@@ -98,43 +99,91 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
       element: HTMLElement,
       options: {
         sitekey: string;
-        "error-callback"?: (errorCode: string) => void;
+        callback?: (token: string) => void;
+        "expired-callback"?: () => void;
+        "timeout-callback"?: () => void;
+        "error-callback"?: (code: string) => boolean;
       },
     ) => string;
     reset: (widgetId: string) => void;
+    remove: (widgetId: string) => void;
+    getResponse: (widgetId: string) => string | undefined;
   };
 
-  type TurnstileWindow = Window & { turnstile?: TurnstileAPI };
-
-  let widgetId: string | undefined;
+  type TurnstileWindow = Window & {
+    turnstile?: TurnstileAPI;
+  };
 
   function initializeContactForm() {
-    widgetId = undefined;
-
     const form = document.querySelector<HTMLFormElement>("#contact-form");
     const container = document.querySelector<HTMLElement>("#contact-turnstile");
     const feedback = document.querySelector<HTMLElement>("#contact-feedback");
     const submit = document.querySelector<HTMLButtonElement>("#contact-submit");
+    const submitLabel = document.querySelector<HTMLElement>("#contact-submit-label");
 
-    if (!form || !container || !feedback || !submit) return;
+    if (!form || !container || !feedback || !submit || !submitLabel) return;
+
+    let widgetId: string | undefined;
+    let verified = false;
+    let sending = false;
+    let active = true;
+
+    const updateButton = () => {
+      submit.disabled = !verified || sending;
+      submitLabel.textContent = sending ? "Sending..." : "Send message";
+    };
+
+    const setFeedback = (message: string) => {
+      feedback.textContent = message;
+    };
 
     const renderTurnstile = () => {
       const api = (window as TurnstileWindow).turnstile;
       const sitekey = container.dataset.sitekey;
 
-      if (api && sitekey && !widgetId) {
-        widgetId = api.render(container, {
-          sitekey,
-          "error-callback": (errorCode: string) => {
-            console.error("Turnstile error code:", errorCode);
-          },
-        });
-      }
+      if (!active || !api || !sitekey || widgetId !== undefined) return;
+
+      widgetId = api.render(container, {
+        sitekey,
+        callback: () => {
+          if (!active) return;
+
+          verified = true;
+          updateButton();
+        },
+        "expired-callback": () => {
+          if (!active || sending) return;
+
+          verified = false;
+          setFeedback("Security verification expired. Please verify again.");
+          updateButton();
+        },
+        "timeout-callback": () => {
+          if (!active || sending) return;
+
+          verified = false;
+          setFeedback("Security verification timed out. Please try again.");
+          updateButton();
+        },
+        "error-callback": (code) => {
+          if (!active || sending) return true;
+
+          verified = false;
+          setFeedback("Security verification failed. Please refresh the page and try again.");
+          updateButton();
+
+          console.error("Turnstile error:", code);
+          return true;
+        },
+      });
     };
 
-    if ((window as TurnstileWindow).turnstile) {
-      renderTurnstile();
-    } else {
+    const loadTurnstile = () => {
+      if ((window as TurnstileWindow).turnstile) {
+        renderTurnstile();
+        return;
+      }
+
       let script = document.querySelector<HTMLScriptElement>("#turnstile-script");
 
       if (!script) {
@@ -146,13 +195,33 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
       }
 
       script.addEventListener("load", renderTurnstile, { once: true });
-    }
+    };
+
+    updateButton();
+    loadTurnstile();
+
+    form.addEventListener("input", () => {
+      if (!sending) {
+        setFeedback("");
+      }
+    });
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
-      feedback.textContent = "";
-      submit.disabled = true;
+      if (sending) return;
+
+      const api = (window as TurnstileWindow).turnstile;
+      const token = widgetId !== undefined ? api?.getResponse(widgetId) : undefined;
+
+      if (!verified || !token) {
+        setFeedback("Please complete the security verification.");
+        return;
+      }
+
+      sending = true;
+      setFeedback("");
+      updateButton();
 
       try {
         const body = new URLSearchParams();
@@ -163,29 +232,57 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
           }
         });
 
+        body.set("cf-turnstile-response", token);
+
         const response = await fetch(form.action, {
           method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
           body,
         });
 
         const result = (await response.json()) as { message?: string };
 
-        feedback.textContent = result.message ?? "Something went wrong.";
+        if (!active) return;
 
-        if (response.ok) {
-          form.reset();
+        if (!response.ok) {
+          setFeedback(result.message ?? "Unable to send your message. Please try again.");
+          return;
         }
-      } catch {
-        feedback.textContent = "Unable to send your message. Please try again.";
-      } finally {
-        submit.disabled = false;
 
-        if (widgetId) {
-          (window as TurnstileWindow).turnstile?.reset(widgetId);
+        form.reset();
+        setFeedback("Your message has been sent successfully. Thank you!");
+      } catch {
+        if (active) {
+          setFeedback("Something went wrong. Please try again.");
+        }
+      } finally {
+        sending = false;
+        verified = false;
+
+        if (active) {
+          updateButton();
+
+          if (widgetId !== undefined) {
+            api?.reset(widgetId);
+          }
         }
       }
     });
+
+    document.addEventListener(
+      "astro:before-swap",
+      () => {
+        active = false;
+
+        if (widgetId !== undefined) {
+          (window as TurnstileWindow).turnstile?.remove(widgetId);
+          widgetId = undefined;
+        }
+      },
+      { once: true },
+    );
   }
 
   document.addEventListener("astro:page-load", initializeContactForm);
