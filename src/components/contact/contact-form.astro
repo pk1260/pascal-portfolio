@@ -1,0 +1,193 @@
+---
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+console.log("Turnstile site key available:", Boolean(siteKey));
+---
+
+<form
+  id="contact-form"
+  action="/api/contact"
+  method="POST"
+  class="space-y-5 rounded-lg border border-border bg-surface p-6 sm:p-8"
+>
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+    <div>
+      <label for="contact-name" class="mb-2 block text-sm font-medium text-text-primary">
+        Name
+      </label>
+      <input
+        id="contact-name"
+        name="name"
+        type="text"
+        autocomplete="name"
+        required
+        minlength="2"
+        maxlength="100"
+        placeholder="Your name"
+        class="w-full rounded-sm border border-border bg-background px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-secondary focus:border-accent"
+      />
+    </div>
+
+    <div>
+      <label for="contact-email" class="mb-2 block text-sm font-medium text-text-primary">
+        Email address
+      </label>
+      <input
+        id="contact-email"
+        name="email"
+        type="email"
+        autocomplete="email"
+        required
+        maxlength="254"
+        placeholder="you@example.com"
+        class="w-full rounded-sm border border-border bg-background px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-secondary focus:border-accent"
+      />
+    </div>
+  </div>
+
+  <div>
+    <label for="contact-subject" class="mb-2 block text-sm font-medium text-text-primary">
+      Subject <span class="text-text-secondary">(optional)</span>
+    </label>
+    <input
+      id="contact-subject"
+      name="subject"
+      type="text"
+      maxlength="150"
+      placeholder="What's this about?"
+      class="w-full rounded-sm border border-border bg-background px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-secondary focus:border-accent"
+    />
+  </div>
+
+  <div>
+    <label for="contact-message" class="mb-2 block text-sm font-medium text-text-primary">
+      Message
+    </label>
+    <textarea
+      id="contact-message"
+      name="message"
+      required
+      minlength="10"
+      maxlength="5000"
+      rows="6"
+      placeholder="Tell me a little about your message..."
+      class="w-full resize-y rounded-sm border border-border bg-background px-4 py-3 text-sm leading-relaxed text-text-primary outline-none transition-colors placeholder:text-text-secondary focus:border-accent"
+    ></textarea>
+  </div>
+
+  <div aria-hidden="true" class="hidden">
+    <label for="contact-website">Website</label>
+    <input id="contact-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div id="contact-turnstile" data-sitekey={siteKey}></div>
+
+  <button
+    id="contact-submit"
+    type="submit"
+    class="inline-flex items-center gap-3 rounded-sm bg-accent px-6 py-3 text-sm font-semibold text-[#111111] transition-opacity hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-50"
+  >
+    Send message
+    <span aria-hidden="true">↗</span>
+  </button>
+
+  <p id="contact-feedback" role="status" aria-live="polite" class="text-sm text-text-secondary"></p>
+</form>
+
+<script>
+  type TurnstileAPI = {
+    render: (
+      element: HTMLElement,
+      options: {
+        sitekey: string;
+        "error-callback"?: (errorCode: string) => void;
+      },
+    ) => string;
+    reset: (widgetId: string) => void;
+  };
+
+  type TurnstileWindow = Window & { turnstile?: TurnstileAPI };
+
+  let widgetId: string | undefined;
+
+  function initializeContactForm() {
+    widgetId = undefined;
+
+    const form = document.querySelector<HTMLFormElement>("#contact-form");
+    const container = document.querySelector<HTMLElement>("#contact-turnstile");
+    const feedback = document.querySelector<HTMLElement>("#contact-feedback");
+    const submit = document.querySelector<HTMLButtonElement>("#contact-submit");
+
+    if (!form || !container || !feedback || !submit) return;
+
+    const renderTurnstile = () => {
+      const api = (window as TurnstileWindow).turnstile;
+      const sitekey = container.dataset.sitekey;
+
+      if (api && sitekey && !widgetId) {
+        widgetId = api.render(container, {
+          sitekey,
+          "error-callback": (errorCode: string) => {
+            console.error("Turnstile error code:", errorCode);
+          },
+        });
+      }
+    };
+
+    if ((window as TurnstileWindow).turnstile) {
+      renderTurnstile();
+    } else {
+      let script = document.querySelector<HTMLScriptElement>("#turnstile-script");
+
+      if (!script) {
+        script = document.createElement("script");
+        script.id = "turnstile-script";
+        script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+        script.async = true;
+        document.head.appendChild(script);
+      }
+
+      script.addEventListener("load", renderTurnstile, { once: true });
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      feedback.textContent = "";
+      submit.disabled = true;
+
+      try {
+        const body = new URLSearchParams();
+
+        new FormData(form).forEach((value, key) => {
+          if (typeof value === "string") {
+            body.append(key, value);
+          }
+        });
+
+        const response = await fetch(form.action, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body,
+        });
+
+        const result = (await response.json()) as { message?: string };
+
+        feedback.textContent = result.message ?? "Something went wrong.";
+
+        if (response.ok) {
+          form.reset();
+        }
+      } catch {
+        feedback.textContent = "Unable to send your message. Please try again.";
+      } finally {
+        submit.disabled = false;
+
+        if (widgetId) {
+          (window as TurnstileWindow).turnstile?.reset(widgetId);
+        }
+      }
+    });
+  }
+
+  document.addEventListener("astro:page-load", initializeContactForm);
+</script>

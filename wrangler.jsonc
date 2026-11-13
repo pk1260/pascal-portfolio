@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "pascal-portfolio",
+  "compatibility_date": "2026-11-13",
+  "main": "./src/worker/index.ts",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"],
+  },
+  "send_email": [
+    {
+      "name": "EMAIL",
+      "destination_address": "pascalkuiper@live.nl",
+    },
+  ],
+  "vars": {
+    "CONTACT_RECIPIENT": "pascalkuiper@live.nl",
+    "CONTACT_SENDER": "contact@pascal-kuiper.nl",
+  },
+}

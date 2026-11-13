@@ -1,11 +1,121 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import SectionHeading from "../components/ui/section-heading.astro";
+import { ArrowUpRight, Github, Linkedin, Mail } from "lucide-astro";
+import ContactForm from "../components/contact/contact-form.astro";
+
+const pageHeading = {
+  eyebrow: "Portfolio / contact",
+  title: "Let's connect",
+  description:
+    "Have an opportunity in mind, want to collaborate, or simply want to say hello? I'd love to hear from you.",
+};
+
+const contactMethods = [
+  {
+    label: "Email",
+    title: "Send me an email",
+    detail: "The easiest way to reach me directly.",
+    href: "mailto:pascalkuiper@live.nl",
+    icon: Mail,
+  },
+  {
+    label: "LinkedIn",
+    title: "Connect with me",
+    detail: "Professional experience and networking.",
+    href: "https://www.linkedin.com/in/pascalkuiper/",
+    icon: Linkedin,
+  },
+  {
+    label: "GitHub",
+    title: "Explore my projects",
+    detail: "Repositories and development work.",
+    href: "https://github.com/pk1260",
+    icon: Github,
+  },
+];
 ---
 
-<BaseLayout title="Pascal Kuiper | Software Engineer">
-  <section class="container-page py-16">
-    <h1 class="text-4xl font-bold tracking-tight text-text-primary">Pascal Kuiper</h1>
+<BaseLayout title="Contact | Pascal Kuiper">
+  <main class="container-page pb-24 md:pb-32">
+    <SectionHeading {...pageHeading} level="h1" />
 
-    <p class="mt-4 text-text-secondary">Software Engineer | Full-Stack Developer | Contact</p>
-  </section>
+    <div class="grid grid-cols-1 items-start gap-8 py-12 lg:grid-cols-[1.3fr_1fr] lg:gap-10">
+      <section aria-labelledby="contact-form-heading">
+        <div class="mb-6">
+          <h2
+            id="contact-form-heading"
+            class="text-xl font-semibold tracking-tight text-text-primary"
+          >
+            Send a message
+          </h2>
+
+          <p class="mt-2 text-sm leading-relaxed text-text-secondary">
+            Fill out the form and I'll get back to you by email.
+          </p>
+        </div>
+
+        <ContactForm />
+      </section>
+
+      <section aria-labelledby="contact-methods-heading">
+        <div class="mb-6">
+          <h2
+            id="contact-methods-heading"
+            class="text-xl font-semibold tracking-tight text-text-primary"
+          >
+            Other ways to connect
+          </h2>
+
+          <p class="mt-2 text-sm leading-relaxed text-text-secondary">
+            Prefer reaching out directly? Find me here.
+          </p>
+        </div>
+
+        <div class="rounded-lg border border-border bg-surface p-6 sm:p-8">
+          <div class="flex flex-col">
+            {contactMethods.map((method, index) => {
+              const Icon = method.icon;
+
+              return (
+                <a
+                  href={method.href}
+                  target={method.href.startsWith("http") ? "_blank" : undefined}
+                  rel={method.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                  class:list={[
+                    "group flex items-start justify-between gap-4 py-6 transition-colors first:pt-0 last:pb-0",
+                    index < contactMethods.length - 1 && "border-b border-border",
+                  ]}
+                >
+                  <div class="flex items-start gap-4">
+                    <Icon size={20} strokeWidth={1.75} class="mt-1 shrink-0 text-accent-text" />
+
+                    <div>
+                      <span class="text-xs font-semibold tracking-[0.15em] text-text-secondary uppercase">
+                        {method.label}
+                      </span>
+
+                      <h3 class="mt-1 text-base font-semibold text-text-primary transition-colors group-hover:text-accent-text">
+                        {method.title}
+                      </h3>
+
+                      <p class="mt-1 text-sm leading-relaxed text-text-secondary">
+                        {method.detail}
+                      </p>
+                    </div>
+                  </div>
+
+                  <ArrowUpRight
+                    size={18}
+                    strokeWidth={1.75}
+                    class="mt-1 shrink-0 text-text-secondary transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-accent-text"
+                  />
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
 </BaseLayout>
