@@ -1,0 +1,148 @@
+---
+import { getCollection, render } from "astro:content";
+import { Image } from "astro:assets";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { Github, Globe, Download, ExternalLink } from "lucide-astro";
+
+export async function getStaticPaths() {
+  const projects = await getCollection("projects");
+
+  return projects.map((project) => ({
+    params: { id: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+
+const projectActions = [
+  { label: "GitHub", href: project.data.github, icon: Github },
+  { label: "Live Website", href: project.data.website, icon: Globe },
+  { label: "Download App", href: project.data.download, icon: Download },
+  { label: "Live Demo", href: project.data.demo, icon: ExternalLink },
+].filter((action) => Boolean(action.href));
+---
+
+<BaseLayout title={`${project.data.title} | Pascal Kuiper`}>
+  <main class="container-page pb-24 md:pb-32">
+    <div class="mb-2">
+      <a
+        id="project-back-link"
+        href="/projects"
+        class="group inline-flex items-center gap-3 text-sm text-secondary transition-colors hover:text-text-primary"
+      >
+        <span
+          aria-hidden="true"
+          class="transition-transform duration-200 group-hover:-translate-x-1"
+        >
+          ←
+        </span>
+        <span id="project-back-label">Back to all projects</span>
+      </a>
+    </div>
+
+    <header class="mb-12 md:mb-2">
+      <div class="mb-6 flex flex-wrap items-center gap-3 text-xs font-medium uppercase tracking-[0.18em] text-secondary">
+        <span class="h-0.5 w-8 bg-accent"></span>
+        <span>{project.data.category.replace("-", " ")}</span>
+        <span aria-hidden="true">/</span>
+        <span>{project.data.status.replace("-", " ")}</span>
+      </div>
+
+      <h1 class="max-w-5xl text-4xl font-semibold leading-[1.1] tracking-tight text-text-primary sm:text-5xl lg:text-6xl">
+        {project.data.title}
+      </h1>
+
+      <p class="mt-7 max-w-3xl text-lg leading-relaxed text-secondary md:text-xl">
+        {project.data.description}
+      </p>
+    </header>
+
+    {projectActions.length > 0 && (
+      <div class="mt-4 flex flex-wrap gap-3 pb-4">
+        {projectActions.map((action) => {
+          const Icon = action.icon;
+
+          return (
+            <a
+              href={action.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group inline-flex items-center gap-2.5 rounded-sm border border-border px-4 py-2.5 text-sm font-medium text-text-primary transition-colors hover:border-accent hover:text-accent"
+            >
+              <Icon size={17} strokeWidth={1.75} aria-hidden="true" />
+              <span>{action.label}</span>
+            </a>
+          );
+        })}
+      </div>
+    )}
+
+    {project.data.cover && (
+      <div class="mb-4 overflow-hidden rounded-lg border border-border bg-surface-elevated p-5 sm:p-10 lg:p-14">
+        <Image
+          src={project.data.cover}
+          alt={`Preview of ${project.data.title}`}
+          widths={[640, 960, 1280, 1600]}
+          sizes="(max-width: 768px) 100vw, 1200px"
+          class="h-auto w-full object-contain"
+        />
+      </div>
+    )}
+
+    <div class="mb-4 flex flex-wrap items-center gap-2 border-b border-border pb-4">
+      {project.data.technologies.map((technology) => (
+        <span class="rounded-sm border border-border px-3 py-1.5 text-xs text-secondary">
+          {technology}
+        </span>
+      ))}
+    </div>
+
+    <article
+      class="case-study-content max-w-5xl mx-auto text-secondary
+        [&_h2]:mb-6 [&_h2]:mt-10 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2]:text-text-primary [&>h2:first-child]:mt-0
+        [&_h3]:mb-4 [&_h3]:mt-8 [&_h3]:text-xl [&_h3]:font-medium [&_h3]:text-text-primary
+        [&_h4]:mb-3 [&_h4]:mt-8 [&_h4]:font-semibold [&_h4]:text-text-primary
+        [&_p]:mb-5 [&_p]:leading-8
+        [&_ul]:mb-6 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6
+        [&_ol]:mb-6 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6
+        [&_li]:leading-7
+        [&_strong]:font-semibold [&_strong]:text-text-primary
+        [&_a]:text-accent [&_a]:underline [&_a]:underline-offset-4
+        [&_blockquote]:my-8 [&_blockquote]:border-l-2 [&_blockquote]:border-accent [&_blockquote]:pl-6
+        [&_pre]:my-8 [&_pre]:overflow-x-auto [&_pre]:rounded-md [&_pre]:border [&_pre]:border-border [&_pre]:bg-surface-elevated [&_pre]:p-5 [&_pre]:text-sm [&_pre]:leading-7
+        [&_code]:wrap-break-words [&_code]:text-sm
+        [&_img]:my-8 [&_img]:h-auto [&_img]:w-full [&_img]:rounded-md
+        [&_hr]:my-12 [&_hr]:border-border"
+    >
+      <Content />
+    </article>
+
+    <footer class="mt-24 border-t border-border pt-8">
+      <a
+        href="/projects"
+        class="inline-flex items-center gap-3 text-sm font-medium text-text-primary transition-colors hover:text-accent"
+      >
+        Explore all projects
+        <span aria-hidden="true">↗</span>
+      </a>
+    </footer>
+  </main>
+</BaseLayout>
+
+<script>
+  function updateProjectBackLink() {
+    const source = sessionStorage.getItem("projectSource");
+
+    const link = document.querySelector<HTMLAnchorElement>("#project-back-link");
+    const label = document.querySelector<HTMLElement>("#project-back-label");
+
+    if (!link || !label) return;
+
+    link.href = source === "home" ? "/#selected-work" : "/projects";
+    label.textContent = source === "home" ? "Back to selected work" : "Back to all projects";
+  }
+
+  document.addEventListener("astro:page-load", updateProjectBackLink);
+</script>

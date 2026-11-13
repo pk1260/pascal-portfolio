@@ -15,67 +15,81 @@ const categoryLabels: Record<string, string> = {
 
 <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
   {projects.map((project, index) => (
-    <article class="group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-surface transition-colors duration-200 hover:border-border-strong">
-      <div class="relative flex aspect-16/10 items-center justify-center overflow-hidden bg-surface-elevated p-6 sm:p-8">
-        {project.data.cover ? (
-          <Image
-            src={project.data.cover}
-            alt={`Preview of ${project.data.title}`}
-            widths={[480, 800, 1200]}
-            sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
-            class="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]"
-          />
-        ) : (
-          <span class="text-xs tracking-widest text-text-secondary">IMAGE COMING SOON</span>
-        )}
+    <a href={`/projects/${project.id}`} data-project-source="home">
+      <article class="group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-surface transition-colors duration-200 hover:border-border-strong">
+        <div class="relative flex aspect-16/10 items-center justify-center overflow-hidden bg-surface-elevated p-6 sm:p-8">
+          {project.data.cover ? (
+            <Image
+              src={project.data.cover}
+              alt={`Preview of ${project.data.title}`}
+              widths={[480, 800, 1200]}
+              sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+              class="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+            />
+          ) : (
+            <span class="text-xs tracking-widest text-text-secondary">IMAGE COMING SOON</span>
+          )}
 
-        <span class="absolute top-4 left-4 text-[10px] font-medium tracking-widest text-text-secondary">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-      </div>
-
-      <div class="flex flex-1 flex-col p-5 sm:p-6">
-        <div class="mb-4 flex flex-wrap items-center gap-2">
-          <span class="text-[10px] font-semibold tracking-[0.12em] text-text-secondary">
-            {categoryLabels[project.data.category]}
-          </span>
-
-          <span aria-hidden="true" class="h-1 w-1 rounded-full bg-border-strong" />
-
-          <span class="text-[10px] font-medium tracking-[0.12em] text-accent-text uppercase">
-            {project.data.status.replace("-", " ")}
+          <span class="absolute top-4 left-4 text-[10px] font-medium tracking-widest text-text-secondary">
+            {String(index + 1).padStart(2, "0")}
           </span>
         </div>
 
-        <h3 class="min-h-14 text-xl leading-7 font-bold tracking-tight text-text-primary sm:min-h-16 sm:text-2xl sm:leading-8">
-          {project.data.title}
-        </h3>
+        <div class="flex flex-1 flex-col p-5 sm:p-6">
+          <div class="mb-4 flex flex-wrap items-center gap-2">
+            <span class="text-[10px] font-semibold tracking-[0.12em] text-text-secondary">
+              {categoryLabels[project.data.category]}
+            </span>
 
-        <p class="mt-3 flex-1 text-sm leading-relaxed text-text-secondary">
-          {project.data.description}
-        </p>
+            <span aria-hidden="true" class="h-1 w-1 rounded-full bg-border-strong" />
 
-        <div class="mt-6">
-          <div class="mb-5 h-px w-full bg-border"></div>
+            <span class="text-[10px] font-medium tracking-[0.12em] text-accent-text uppercase">
+              {project.data.status.replace("-", " ")}
+            </span>
+          </div>
 
-          <ul class="flex min-w-0 items-center gap-2" aria-label="Technologies">
-            {project.data.technologies.slice(0, 3).map((tech) => (
-              <li
-                title={tech}
-                class="min-w-0 truncate rounded-sm bg-surface-elevated px-2.5 py-1.5 text-xs font-medium text-text-secondary"
-              >
-                {tech}
-              </li>
-            ))}
+          <h3 class="min-h-14 text-xl leading-7 font-bold tracking-tight text-text-primary sm:min-h-16 sm:text-2xl sm:leading-8">
+            {project.data.title}
+          </h3>
 
-            {project.data.technologies.length > 3 && (
-              <li class="shrink-0 px-1 text-xs font-medium text-text-secondary">
-                +{project.data.technologies.length - 3}
-              </li>
-            )}
-          </ul>
+          <p class="mt-3 flex-1 text-sm leading-relaxed text-text-secondary">
+            {project.data.description}
+          </p>
+
+          <div class="mt-6">
+            <div class="mb-5 h-px w-full bg-border"></div>
+
+            <ul class="flex min-w-0 items-center gap-2" aria-label="Technologies">
+              {project.data.technologies.slice(0, 3).map((tech) => (
+                <li
+                  title={tech}
+                  class="min-w-0 truncate rounded-sm bg-surface-elevated px-2.5 py-1.5 text-xs font-medium text-text-secondary"
+                >
+                  {tech}
+                </li>
+              ))}
+
+              {project.data.technologies.length > 3 && (
+                <li class="shrink-0 px-1 text-xs font-medium text-text-secondary">
+                  +{project.data.technologies.length - 3}
+                </li>
+              )}
+            </ul>
+          </div>
         </div>
-      </div>
-    </article>
+      </article>
+    </a>
   ))}
 </div>
+
+<script>
+  document.addEventListener("click", (event) => {
+    if (!(event.target instanceof Element)) return;
+
+    const link = event.target.closest<HTMLAnchorElement>("a[data-project-source]");
+
+    if (!link) return;
+
+    sessionStorage.setItem("projectSource", link.dataset.projectSource ?? "work");
+  });
+</script>

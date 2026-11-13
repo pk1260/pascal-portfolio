@@ -19,6 +19,9 @@ const projectSchema = z.object({
   category: projectCategory,
   status: projectStatus,
   github: githubRepo,
+  website: z.url().optional(),
+  download: z.url().optional(),
+  demo: z.url().optional(),
   order: z.number().int().positive(),
 });
 
@@ -29,7 +32,7 @@ const projectCollection = defineCollection({
   }),
   schema: ({ image }) =>
     projectSchema.extend({
-      cover: image().optional(),
+      cover: image(),
       gallery: z.array(image()).optional(),
     }),
 });
