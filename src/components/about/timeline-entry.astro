@@ -1,0 +1,45 @@
+---
+interface Props {
+  title: string;
+  organization: string;
+  period: string;
+  description?: string;
+  href?: string;
+}
+
+const { title, organization, period, description, href } = Astro.props;
+---
+
+<div class="relative border-l border-border pb-10 pl-7 last:pb-0">
+  <span
+    aria-hidden="true"
+    class="absolute -left-1.25 top-2 h-2.25 w-2.25 rounded-full bg-accent ring-4 ring-background"
+  ></span>
+
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+    <div>
+      <h3 class="text-lg font-semibold leading-snug tracking-tight text-text-primary">{title}</h3>
+
+      <p class="mt-1 text-sm font-medium text-text-secondary">{organization}</p>
+    </div>
+
+    <span class="shrink-0 text-xs font-medium tracking-wide text-text-secondary sm:pt-1">
+      {period}
+    </span>
+  </div>
+
+  {description && (
+    <p class="mt-4 max-w-2xl text-sm leading-relaxed text-text-secondary">{description}</p>
+  )}
+
+  {href && (
+    <a
+      href={href}
+      data-project-source="about"
+      class="group mt-4 inline-flex items-center gap-2 text-xs font-semibold text-accent-text transition-colors hover:text-text-primary"
+    >
+      View project
+      <span aria-hidden="true">↗</span>
+    </a>
+  )}
+</div>

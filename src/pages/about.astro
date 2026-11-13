@@ -1,11 +1,389 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import SectionHeading from "../components/ui/section-heading.astro";
+import { Image } from "astro:assets";
+import portraitImage from "../assets/about/pascal.webp";
+import TimelineEntry from "../components/about/timeline-entry.astro";
+
+const pageHeading = {
+  eyebrow: "Portfolio / about",
+  title: "Behind the code",
+  description: "From design foundations to software engineering.",
+};
+
+const educationTimeline = [
+  {
+    title: "HBO-ICT · Software Engineering",
+    organization: "Leiden University of Applied Sciences",
+    period: "2021 – 2026",
+    description:
+      "Studied software engineering with a focus on designing, developing, and testing software applications. Gained experience in frontend and backend development, software architecture, and technical research through individual and team projects.",
+  },
+  {
+    title: "Minor · Data Science",
+    organization: "Amsterdam University of Applied Sciences",
+    period: "2025 - 2026",
+    description:
+      "Explored data processing, machine learning, and data visualization using Python. Worked with real-world datasets and practical assignments involving data preprocessing, model development, and interactive dashboards.",
+  },
+  {
+    title: "MBO Level 4 · Media Developer",
+    organization: "Mediacollege Amsterdam",
+    period: "2018 – 2021",
+    description:
+      "Developed skills in web development, interactive media, and digital design, combining programming with user-focused visual solutions.",
+  },
+  {
+    title: "MBO Level 3 · Allround DTP",
+    organization: "Mediacollege Amsterdam",
+    period: "2016 – 2018",
+    description:
+      "Focused on graphic design, digital publishing, and preparing visual materials for print and digital media using tools such as Adobe Illustrator and InDesign.",
+  },
+  {
+    title: "MBO Level 2 · DTP",
+    organization: "Mediacollege Amsterdam",
+    period: "2014 – 2016",
+    description:
+      "Built a foundation in graphic design, visual communication, and digital production, including working with Adobe Photoshop.",
+  },
+];
+
+const experienceTimeline = [
+  {
+    title: "Software Engineering Intern",
+    organization: "Dingdong · Amsterdam",
+    period: "Feb 2026 – Jul 2026",
+    description:
+      "Developed web preview and deep-linking functionality for a student housing platform. Worked with Django, React Native, Next.js, and Cloudflare Workers to connect shared room listings with the mobile application.",
+    href: "/projects/dingdong",
+  },
+  {
+    title: "Software Engineering Intern",
+    organization: "VRcafe – Let's Play! · Haarlem",
+    period: "Feb 2025 – Jul 2025",
+    description:
+      "Developed an Astro-based website and researched rendering strategies, image optimization, and website performance using Tailwind CSS, Python, and performance testing.",
+    href: "/projects/vrcafe",
+  },
+  {
+    title: "Junior Software Engineering Intern",
+    organization: "New Fountain B.V. · Haarlem",
+    period: "Sep 2020 – Feb 2021",
+    description:
+      "Gained practical experience in web development using PHP, MySQL, HTML, CSS, and JavaScript.",
+  },
+  {
+    title: "Junior Software Engineering Intern",
+    organization: "Webgerei · Amsterdam",
+    period: "Feb 2020 – Jul 2020",
+    description:
+      "Worked on developing and maintaining websites using PHP, HTML, CSS, and JavaScript.",
+  },
+  {
+    title: "Junior Graphic Design Intern",
+    organization: "Incentive Europe Premiums & Concepts · Amsterdam",
+    period: "Sep 2017 – Jun 2018",
+    description:
+      "Gained professional experience in graphic design and visual production using Adobe Illustrator and InDesign.",
+  },
+];
+
+const skillGroups = [
+  {
+    title: "Frontend & Mobile",
+    skills: [
+      "HTML5",
+      "CSS3",
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "React Native",
+      "Expo",
+      "Next.js",
+      "Astro",
+      "Angular",
+      "Tailwind CSS",
+      "MDX",
+    ],
+  },
+  {
+    title: "Backend & APIs",
+    skills: [
+      "Python",
+      "Django",
+      "Java",
+      "Spring Boot",
+      "Node.js",
+      "PHP",
+      "Laravel",
+      "MySQL",
+      "PostgreSQL",
+      "Sqlite",
+      "SQL",
+      "REST APIs",
+    ],
+  },
+  {
+    title: "Desktop & Data Science",
+    skills: [
+      "C++",
+      "Qt",
+      "SQLite",
+      "Jupyter Notebook",
+      "Pandas",
+      "Matplotlib",
+      "Seaborn",
+      "Streamlit",
+    ],
+  },
+  {
+    title: "Development & Infrastructure",
+    skills: [
+      "Git",
+      "GitHub",
+      "Docker",
+      "CMake",
+      "Playwright",
+      "jest",
+      "kubernetes",
+      "CI/CD",
+      "Cloudflare Workers",
+      "Linux",
+    ],
+  },
+  {
+    title: "Design & Creative Tools",
+    skills: [
+      "Adobe Photoshop",
+      "Adobe Illustrator",
+      "Adobe InDesign",
+      "Adobe XD",
+      "Adobe After Effects",
+      "Graphic Design",
+      "Photopea",
+      "Figma",
+      "Canva",
+    ],
+  },
+];
+
+const interests = [
+  {
+    title: "Japanese language",
+    label: "日本語",
+    description:
+      "I'm studying Japanese through self-study, gradually improving my understanding of its writing systems, grammar, and everyday communication.",
+  },
+  {
+    title: "Travel & culture",
+    label: "旅",
+    description:
+      "I enjoy exploring new places, experiencing different cultures, and discovering both cities and natural landscapes, particularly in Japan.",
+  },
+  {
+    title: "Technology & learning",
+    label: "好奇心",
+    description:
+      "Outside professional development, I enjoy experimenting with new technologies and working on personal projects to expand my understanding.",
+  },
+  {
+    title: "Design & creativity",
+    label: "デザイン",
+    description:
+      "My background in graphic design has given me a lasting interest in typography, visual composition, and creating thoughtful digital experiences.",
+  },
+];
 ---
 
-<BaseLayout title="Pascal Kuiper | Software Engineer">
-  <section class="container-page py-16">
-    <h1 class="text-4xl font-bold tracking-tight text-text-primary">Pascal Kuiper</h1>
+<BaseLayout title="About | Pascal Kuiper">
+  <main class="container-page pb-24 md:pb-32">
+    <SectionHeading {...pageHeading} level="h1" />
 
-    <p class="mt-4 text-text-secondary">Software Engineer | Full-Stack Developer | About</p>
-  </section>
+    <section
+      aria-label="Introduction"
+      class="grid grid-cols-1 items-start gap-10 border-b border-border pb-16 md:grid-cols-[1.3fr_1fr] md:gap-16 md:grid-reverse"
+    >
+      <div class="max-w-2xl order-2 md:order-1">
+        <h2 class="mb-6 text-2xl font-semibold tracking-tight text-text-primary">
+          Hi, I'm Pascal<span class="text-accent">.</span>
+        </h2>
+
+        <div class="space-y-5 text-sm leading-8 text-text-secondary md:text-base">
+          <p>
+            I'm a software engineer from the Netherlands with a background in both software
+            development and design. My journey started in media development, where I developed an
+            appreciation for visual design and user experience, before moving further into software
+            engineering.
+          </p>
+          <p>
+            During my studies in HBO-ICT at Leiden University of Applied Sciences, I've worked on a
+            variety of projects involving web development, mobile applications, backend systems, and
+            desktop software. Through internships at companies such as Dingdong and VRcafe, I've
+            gained practical experience building applications, exploring technical challenges, and
+            improving existing systems.
+          </p>
+          <p>
+            I enjoy understanding how things work, learning new technologies, and finding practical
+            solutions to problems. My design background also influences how I approach development:
+            I care about building software that works reliably and feels intuitive to use.
+          </p>
+          <p>
+            Outside of programming, I enjoy travelling, discovering different cultures, and studying
+            Japanese. I'm naturally curious and always looking for opportunities to learn something
+            new.
+          </p>
+        </div>
+      </div>
+
+      <div class="overflow-hidden rounded-lg border border-border bg-surface-elevated order-1 md:order-2">
+        <Image
+          src={portraitImage}
+          alt="Portrait of Pascal Kuiper"
+          class="aspect-3/4 w-full object-cover"
+        />
+      </div>
+    </section>
+
+    <section aria-label="Experience and education" class="py-12">
+      <h2
+        id="education-heading"
+        class="mb-8 text-2xl font-semibold tracking-tight text-text-primary"
+      >
+        Experience
+      </h2>
+      <div class="rounded-lg border border-border bg-surface p-6 sm:p-8">
+        {experienceTimeline.map((experience) => (
+          <TimelineEntry {...experience} />
+        ))}
+      </div>
+      <h2
+        id="education-heading"
+        class="my-8 text-2xl font-semibold tracking-tight text-text-primary"
+      >
+        Education
+      </h2>
+      <div class="rounded-lg border border-border bg-surface p-6 sm:p-8">
+        {educationTimeline.map((education) => (
+          <TimelineEntry {...education} />
+        ))}
+      </div>
+    </section>
+
+    <section aria-label="Technical skills">
+      <section aria-labelledby="skills-heading" class="border-b border-border py-12">
+        <div class="mb-8">
+          <h2 id="skills-heading" class="text-2xl font-semibold tracking-tight text-text-primary">
+            Technical expertise<span class="text-accent">.</span>
+          </h2>
+
+          <p class="mt-2 text-sm text-text-secondary">
+            Technologies and tools I've worked with across different projects.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {skillGroups.map((group, index) => (
+            <div
+              class:list={[
+                "rounded-lg border border-border bg-surface p-6 transition-colors duration-200 hover:border-border-strong sm:p-7",
+                {
+                  "md:col-span-2": index === skillGroups.length - 1 && skillGroups.length % 2 === 1,
+                },
+              ]}
+            >
+              <div class="mb-6 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <span aria-hidden="true" class="h-0.5 w-5 bg-accent" />
+                  <h3 class="text-base font-semibold tracking-tight text-text-primary">
+                    {group.title}
+                  </h3>
+                </div>
+
+                <span class="text-xs font-medium text-text-secondary">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+              </div>
+
+              <ul class="flex flex-wrap gap-2" aria-label={`${group.title} technologies`}>
+                {group.skills.map((skill) => (
+                  <li class="rounded-sm border border-border bg-surface-elevated px-3 py-1.5 text-xs font-medium text-text-secondary">
+                    {skill}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+    </section>
+
+    <section aria-labelledby="interests-heading" class="border-b border-border py-12">
+      <div class="mb-8">
+        <h2 id="interests-heading" class="text-2xl font-semibold tracking-tight text-text-primary">
+          Beyond the code<span class="text-accent">.</span>
+        </h2>
+
+        <p class="mt-3 text-sm text-text-secondary">
+          A few things that keep me curious outside software engineering.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {interests.map((interest, index) => (
+          <div class="rounded-lg border border-border bg-surface p-6 transition-colors duration-200 hover:border-border-strong sm:p-7">
+            <div class="mb-6 flex items-center justify-between gap-4">
+              <span class="text-xs font-semibold tracking-[0.15em] text-accent-text">
+                {interest.label}
+              </span>
+
+              <span class="text-xs font-medium tracking-wide text-text-secondary">
+                {String(index + 1).padStart(2, "0")} / INTEREST
+              </span>
+            </div>
+
+            <h3 class="mb-3 text-lg font-semibold tracking-tight text-text-primary">
+              {interest.title}
+            </h3>
+
+            <p class="text-sm leading-7 text-text-secondary">{interest.description}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section aria-labelledby="contact-cta-heading" class="pt-16 pb-8">
+      <div class="mb-4 flex items-center gap-3">
+        <span aria-hidden="true" class="h-0.5 w-8 bg-accent"></span>
+        <span class="text-xs font-semibold tracking-[0.15em] text-text-secondary uppercase">
+          What's next?
+        </span>
+      </div>
+
+      <h2
+        id="contact-cta-heading"
+        class="text-3xl font-bold tracking-tight text-text-primary md:text-4xl"
+      >
+        Let's build something<span class="text-accent">.</span>
+      </h2>
+
+      <p class="mt-4 max-w-xl text-sm leading-7 text-text-secondary">
+        Interested in working together, discussing an opportunity, or simply getting in touch? I'd
+        be happy to hear from you.
+      </p>
+
+      <a
+        href="/contact"
+        class="group mt-7 inline-flex items-center gap-3 rounded-sm border border-border bg-surface px-5 py-3 text-sm font-semibold text-text-primary transition-colors hover:border-accent hover:text-accent-text"
+      >
+        Get in touch
+        <span
+          aria-hidden="true"
+          class="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+        >
+          ↗
+        </span>
+      </a>
+    </section>
+  </main>
 </BaseLayout>
