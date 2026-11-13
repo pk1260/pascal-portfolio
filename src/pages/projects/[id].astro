@@ -140,8 +140,23 @@ const projectActions = [
 
     if (!link || !label) return;
 
-    link.href = source === "home" ? "/#selected-work" : "/projects";
-    label.textContent = source === "home" ? "Back to selected work" : "Back to all projects";
+    switch (source) {
+      case "home":
+        link.href = "/#selected-work";
+        label.textContent = "Back to selected work";
+        break;
+
+      case "about":
+        link.href = "/about#experience";
+        label.textContent = "Back to experience";
+        break;
+
+      case "work":
+      default:
+        link.href = "/projects";
+        label.textContent = "Back to all projects";
+        break;
+    }
   }
 
   document.addEventListener("astro:page-load", updateProjectBackLink);
