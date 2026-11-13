@@ -15,12 +15,7 @@ const pageHeading = {
 
 <BaseLayout title="Work | Pascal Kuiper">
   <main class="container-page pb-24 md:pb-32">
-    <SectionHeading
-      eyebrow={pageHeading.eyebrow}
-      title={pageHeading.title}
-      description={pageHeading.description}
-      level="h1"
-    />
+    <SectionHeading {...pageHeading} level="h1" />
 
     <div class="mb-8 flex items-center justify-between border-b border-border pb-4">
       <span class="text-xs font-medium tracking-widest text-secondary">
