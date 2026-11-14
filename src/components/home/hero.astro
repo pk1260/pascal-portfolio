@@ -6,7 +6,7 @@ import Typewriter from "./typewriter.astro";
 
 <section
   aria-labelledby="hero-title"
-  class="relative isolate flex min-h-svh items-center overflow-hidden bg-[#0B0B0B] text-[#F5F5F5]"
+  class="relative isolate flex min-h-svh items-center overflow-hidden bg-hero-background text-hero-foreground"
 >
   <Image
     src={tokyoImage}
@@ -20,7 +20,7 @@ import Typewriter from "./typewriter.astro";
 
   <div
     aria-hidden="true"
-    class="absolute inset-0 -z-10 bg-linear-to-r from-[#050709]/85 via-[#050709]/55 to-[#050709]/20"
+    class="absolute inset-0 -z-10 bg-linear-to-r from-hero-overlay/85 via-hero-overlay/55 to-hero-overlay/20"
   ></div>
 
   <div class="container-page relative z-10 py-36 md:py-44">
@@ -32,18 +32,18 @@ import Typewriter from "./typewriter.astro";
       >
         <span class="block">PASCAL</span>
         <span class="block">
-          KUIPER<span class="text-[#FC7E00]">.</span>
+          KUIPER<span class="text-accent">.</span>
         </span>
       </h1>
 
       <p
-        class="mt-6 text-sm font-medium tracking-[0.12em] text-[#FC7E00] md:text-lg"
+        class="mt-6 text-sm font-medium tracking-[0.12em] text-accent md:text-lg"
         data-hero-reveal="2"
       >
         ソフトウェアエンジニア
       </p>
 
-      <div class="mt-7 border-l-[3px] border-[#FC7E00] pl-5" data-hero-reveal="3">
+      <div class="mt-7 border-l-[3px] border-accent pl-5" data-hero-reveal="3">
         <h2 class="text-[clamp(1.65rem,4vw,3.4rem)] leading-[1.05] font-bold tracking-tight">
           <span class="block">I AM</span>
           <Typewriter />
@@ -53,7 +53,7 @@ import Typewriter from "./typewriter.astro";
       <div class="mt-9 flex flex-wrap items-center gap-5" data-hero-reveal="2">
         <a
           href="/projects"
-          class="inline-flex min-h-11 items-center justify-center rounded-sm bg-[#FC7E00] px-6 py-3 text-sm font-bold text-[#111111] no-underline hover:bg-[#FF9A33] hover:no-underline"
+          class="inline-flex min-h-11 items-center justify-center rounded-sm bg-accent px-6 py-3 text-sm font-bold text-accent-foreground no-underline hover:bg-accent-hover hover:no-underline"
         >
           VIEW MY WORK
           <span aria-hidden="true" class="ml-3">
@@ -63,7 +63,7 @@ import Typewriter from "./typewriter.astro";
 
         <a
           href="/about"
-          class="inline-flex min-h-11 items-center border-b border-[#F5F5F5] px-1 text-sm font-medium text-[#F5F5F5] no-underline hover:border-[#FC7E00] hover:no-underline"
+          class="inline-flex min-h-11 items-center border-b border-hero-foreground px-1 text-sm font-medium text-hero-foreground no-underline hover:border-accent hover:no-underline"
         >
           ABOUT ME
         </a>
@@ -98,7 +98,7 @@ import Typewriter from "./typewriter.astro";
     class="absolute bottom-0 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 text-xs tracking-[0.2em] text-white no-underline hover:no-underline md:flex"
   >
     SCROLL
-    <span aria-hidden="true" class="h-20 w-px bg-[#FC7E00]"></span>
+    <span aria-hidden="true" class="h-20 w-px bg-accent"></span>
   </a>
 </section>
 

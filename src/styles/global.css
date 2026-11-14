@@ -17,11 +17,16 @@
   --accent: #fc7e00;
   --accent-text: #a34b00;
   --accent-foreground: #111111;
+  --accent-hover: #ff9a33;
 
   --focus-ring: #a34b00;
 
   --content-width: 72rem;
   --reading-width: 45rem;
+
+  --hero-background: #0b0b0b;
+  --hero-foreground: #f5f5f5;
+  --hero-overlay: #050709;
 }
 
 /* Dark theme */
@@ -83,6 +88,11 @@
   --color-accent-foreground: var(--accent-foreground);
 
   --color-focus-ring: var(--focus-ring);
+
+  --color-hero-background: var(--hero-background);
+  --color-hero-foreground: var(--hero-foreground);
+  --color-hero-overlay: var(--hero-overlay);
+  --color-accent-hover: var(--accent-hover);
 
   --font-sans: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
