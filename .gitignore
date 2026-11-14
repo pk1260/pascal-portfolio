@@ -31,3 +31,11 @@ pnpm-debug.log*
 
 # Cloudflare local development
 .wrangler/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
