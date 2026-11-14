@@ -14,6 +14,9 @@ interface Env {
   TURNSTILE_SECRET_KEY: string;
   CONTACT_RECIPIENT: string;
   CONTACT_SENDER: string;
+  CONTACT_RATE_LIMITER: {
+    limit: (options: { key: string }) => Promise<{ success: boolean }>;
+  };
 }
 
 interface TurnstileResult {
@@ -23,6 +26,49 @@ interface TurnstileResult {
 
 const reply = (message: string, status: number) =>
   Response.json({ message }, { status, headers: { "Cache-Control": "no-store" } });
+
+const MAX_BODY_BYTES = 20_000;
+
+async function readLimitedBody(request: Request): Promise<string | null> {
+  if (!request.body) return "";
+
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) break;
+
+      totalBytes += value.byteLength;
+
+      if (totalBytes > MAX_BODY_BYTES) {
+        await reader.cancel();
+        return null;
+      }
+
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const bytes = new Uint8Array(totalBytes);
+  let offset = 0;
+
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    throw new Error("INVALID_UTF8");
+  }
+}
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -36,38 +82,74 @@ export default {
       return reply("Method not allowed.", 405);
     }
 
+    const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
+
+    const { success } = await env.CONTACT_RATE_LIMITER.limit({
+      key: `contact:${ip}`,
+    });
+
+    if (!success) {
+      return reply("Too many requests. Please try again later.", 429);
+    }
+
     if (request.headers.get("origin") !== url.origin) {
       return reply("Invalid request origin.", 403);
     }
 
-    if (!request.headers.get("content-type")?.includes("application/x-www-form-urlencoded")) {
+    const contentType = request.headers.get("content-type");
+    const mediaType = contentType?.split(";", 1)[0].trim().toLowerCase();
+
+    if (mediaType !== "application/x-www-form-urlencoded") {
       return reply("Unsupported content type.", 415);
     }
 
-    if (Number(request.headers.get("content-length") ?? 0) > 20000) {
+    if (Number(request.headers.get("content-length") ?? 0) > MAX_BODY_BYTES) {
       return reply("Message is too large.", 413);
     }
 
     try {
-      const form = await request.formData();
+      const rawBody = await readLimitedBody(request);
 
-      const name = String(form.get("name") ?? "").trim();
-      const email = String(form.get("email") ?? "").trim();
-      const subject = String(form.get("subject") ?? "").trim();
-      const message = String(form.get("message") ?? "").trim();
-      const website = String(form.get("website") ?? "");
-      const token = String(form.get("cf-turnstile-response") ?? "");
+      if (rawBody === null) {
+        return reply("Message is too large.", 413);
+      }
+
+      const form = new URLSearchParams(rawBody);
+
+      const allowedFields = new Set([
+        "name",
+        "email",
+        "subject",
+        "message",
+        "website",
+        "cf-turnstile-response",
+      ]);
+
+      for (const [key] of form) {
+        if (!allowedFields.has(key) || form.getAll(key).length !== 1) {
+          return reply("Invalid form data.", 400);
+        }
+      }
+
+      const name = (form.get("name") ?? "").trim();
+      const email = (form.get("email") ?? "").trim();
+      const subject = (form.get("subject") ?? "").trim();
+      const message = (form.get("message") ?? "").trim();
+      const website = form.get("website") ?? "";
+      const token = form.get("cf-turnstile-response") ?? "";
 
       if (website) {
         return reply("Message received.", 200);
       }
 
       const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      const validHeaders = !/[\r\n\x00-\x1f\x7f]/.test(subject + email);
 
       if (
         name.length < 2 ||
         name.length > 100 ||
         !validEmail ||
+        !validHeaders ||
         email.length > 254 ||
         subject.length > 150 ||
         message.length < 10 ||
@@ -120,6 +202,10 @@ export default {
 
       return reply("Your message has been sent successfully.", 200);
     } catch (error) {
+      if (error instanceof Error && error.message === "INVALID_UTF8") {
+        return reply("Invalid request encoding.", 400);
+      }
+
       console.error("Contact submission failed:", error);
       return reply("Unable to send your message right now.", 500);
     }

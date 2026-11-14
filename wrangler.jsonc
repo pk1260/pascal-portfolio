@@ -18,4 +18,14 @@
     "CONTACT_RECIPIENT": "pascalkuiper@live.nl",
     "CONTACT_SENDER": "contact@pascal-kuiper.nl",
   },
+  "ratelimits": [
+    {
+      "name": "CONTACT_RATE_LIMITER",
+      "namespace_id": "1001",
+      "simple": {
+        "limit": 5,
+        "period": 60,
+      },
+    },
+  ],
 }
