@@ -74,7 +74,10 @@ test.describe("Portfolio navigation", () => {
   test("logo navigates back to the homepage", async ({ page }) => {
     await page.goto("/about/");
 
-    await page.getByRole("link", { name: /PK.*Pascal Kuiper.*Home/i }).click();
+    await page
+      .getByRole("banner")
+      .getByRole("link", { name: /PK.*Pascal Kuiper.*Home/i })
+      .click();
 
     await expect(page).toHaveURL(/\/$/);
 
