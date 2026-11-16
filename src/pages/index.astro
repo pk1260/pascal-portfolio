@@ -2,25 +2,21 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/home/hero.astro";
 import SelectedWork from "../components/home/selected-work.astro";
-import SectionHeading from "../components/ui/section-heading.astro";
+import AboutPreview from "../components/home/about-preview.astro";
+import Technologies from "../components/home/technologies.astro";
+import ContactCta from "../components/home/contact-cta.astro";
 
 const pageDescription = {
   title: "Home | Pascal Kuiper",
   description:
     "	Explore the portfolio of Pascal Kuiper, a software engineer building web and mobile applications, exploring technologies, and solving real-world problems.",
 };
-
-const pageHeading = {
-  eyebrow: "Portfolio / Work",
-  title: "Selected work",
-  description: "A collection of software projects, technical research, and things I've built.",
-};
 ---
 
 <BaseLayout title={pageDescription.title} description={pageDescription.description} fullBleed>
   <Hero />
-  <section id="selected-work" class="container-page py-8 lg:py-24">
-    <SectionHeading {...pageHeading} />
-    <SelectedWork />
-  </section>
+  <SelectedWork />
+  <AboutPreview />
+  <Technologies />
+  <ContactCta />
 </BaseLayout>

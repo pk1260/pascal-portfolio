@@ -4,9 +4,10 @@ interface Props {
   title: string;
   description?: string;
   level?: "h1" | "h2";
+  headingId?: string;
 }
 
-const { eyebrow, title, description, level = "h2" } = Astro.props;
+const { eyebrow, title, description, level = "h2", headingId } = Astro.props;
 const Heading = level;
 ---
 
@@ -19,7 +20,7 @@ const Heading = level;
     </span>
   </div>
 
-  <Heading class="text-3xl font-bold tracking-tight text-text-primary md:text-4xl">
+  <Heading id={headingId} class="text-3xl font-bold tracking-tight text-text-primary md:text-4xl">
     {title}
     <span class="text-accent">.</span>
   </Heading>

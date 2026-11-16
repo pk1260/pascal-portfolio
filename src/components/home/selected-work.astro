@@ -1,12 +1,35 @@
 ---
 import { getCollection } from "astro:content";
 import ProjectCard from "../projects/project-card.astro";
+import SectionHeading from "../ui/section-heading.astro";
+import { ArrowUpRight } from "lucide-astro";
+
+const sectionHeading = {
+  eyebrow: "Portfolio / Work",
+  title: "Selected work",
+  description: "A collection of software projects, technical research, and things I've built.",
+};
 
 const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
 ---
 
-<div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-  {projects.map((project) => (
-    <ProjectCard project={project} source="home" />
-  ))}
-</div>
+<section id="selected-work" class="container-page py-8 lg:py-24 border-b border-border">
+  <div class="mb-2 flex items-start justify-between gap-6">
+    <SectionHeading {...sectionHeading} />
+    <span aria-hidden="true" class="hidden font-mono text-xs text-text-secondary md:block">
+      01 / 04
+    </span>
+  </div>
+  <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+    {projects.map((project) => (
+      <ProjectCard project={project} source="home" />
+    ))}
+  </div>
+  <a
+    href="/projects"
+    class="group mt-8 inline-flex items-center gap-2 font-medium text-accent-text transition-colors hover:text-text-primary no-un"
+  >
+    More work
+    <ArrowUpRight size={18} aria-hidden="true" class="transition-transform duration-200" />
+  </a>
+</section>
