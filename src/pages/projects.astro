@@ -6,6 +6,12 @@ import SectionHeading from "../components/ui/section-heading.astro";
 
 const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
 
+const pageDescription = {
+  title: "Work | Pascal Kuiper",
+  description:
+    "Explore software engineering projects by Pascal Kuiper, including web applications, mobile development, and technical research.",
+};
+
 const pageHeading = {
   eyebrow: "Portfolio / Work",
   title: "Selected work",
@@ -13,7 +19,7 @@ const pageHeading = {
 };
 ---
 
-<BaseLayout title="Work | Pascal Kuiper">
+<BaseLayout title={pageDescription.title} description={pageDescription.description}>
   <main class="container-page pb-24 md:pb-32">
     <SectionHeading {...pageHeading} level="h1" />
 

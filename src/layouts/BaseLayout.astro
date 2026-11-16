@@ -7,13 +7,20 @@ interface Props {
   title: string;
   description?: string;
   fullBleed?: boolean;
+  image?: string;
+  imageAlt?: string;
 }
 
 const {
   title,
   description = "Software engineering projects, research, and development by Pascal Kuiper.",
   fullBleed = false,
+  image = "/og/default.png",
+  imageAlt = "Pascal Kuiper portfolio preview",
 } = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const imageURL = new URL(image, Astro.site);
 ---
 
 <!doctype html>
@@ -24,6 +31,25 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL.href} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Pascal Kuiper" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL.href} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content={imageURL.href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={imageURL.href} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="icon" type="image/svg+xml" href="/pk-favicon.svg" />
     <title>{title}</title>
 

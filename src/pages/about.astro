@@ -5,6 +5,12 @@ import { Image } from "astro:assets";
 import portraitImage from "../assets/about/pascal.webp";
 import TimelineEntry from "../components/about/timeline-entry.astro";
 
+const pageDescription = {
+  title: "About | Pascal Kuiper",
+  description:
+    "Learn more about Pascal Kuiper, his background in software engineering, technical experience, and approach to building software.",
+};
+
 const pageHeading = {
   eyebrow: "Portfolio / about",
   title: "Behind the code",
@@ -196,7 +202,7 @@ const interests = [
 ];
 ---
 
-<BaseLayout title="About | Pascal Kuiper">
+<BaseLayout title={pageDescription.title} description={pageDescription.description}>
   <main class="container-page pb-24 md:pb-32">
     <SectionHeading {...pageHeading} level="h1" />
 

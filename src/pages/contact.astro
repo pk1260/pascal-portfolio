@@ -4,6 +4,12 @@ import SectionHeading from "../components/ui/section-heading.astro";
 import { ArrowUpRight, Github, Linkedin, Mail } from "lucide-astro";
 import ContactForm from "../components/contact/contact-form.astro";
 
+const pageDescription = {
+  title: "Contact | Pascal Kuiper",
+  description:
+    "Get in touch with Pascal Kuiper for software engineering opportunities, collaborations, or questions about his work.",
+};
+
 const pageHeading = {
   eyebrow: "Portfolio / contact",
   title: "Let's connect",
@@ -36,7 +42,7 @@ const contactMethods = [
 ];
 ---
 
-<BaseLayout title="Contact | Pascal Kuiper">
+<BaseLayout title={pageDescription.title} description={pageDescription.description}>
   <main class="container-page pb-24 md:pb-32">
     <SectionHeading {...pageHeading} level="h1" />
 

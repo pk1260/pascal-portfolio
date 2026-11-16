@@ -16,6 +16,13 @@ export async function getStaticPaths() {
 const { project } = Astro.props;
 const { Content } = await render(project);
 
+const pageDescription = {
+  title: `${project.data.title.trim()} | Pascal Kuiper`,
+  description: project.data.description,
+  image: `/og/${project.id}.png`,
+  imageAlt: `${project.data.title.trim()} project preview`,
+};
+
 const projectActions = [
   { label: "GitHub", href: project.data.github, icon: Github },
   { label: "Live Website", href: project.data.website, icon: Globe },
@@ -24,7 +31,7 @@ const projectActions = [
 ].filter((action) => Boolean(action.href));
 ---
 
-<BaseLayout title={`${project.data.title} | Pascal Kuiper`}>
+<BaseLayout {...pageDescription}>
   <div class="container-page pb-24 md:pb-32">
     <div class="mb-2">
       <a
