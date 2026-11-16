@@ -5,6 +5,7 @@ import { Image } from "astro:assets";
 interface Props {
   project: CollectionEntry<"projects">;
   source: "home" | "work";
+  headingLevel?: "h2" | "h3";
 }
 
 const categoryLabels: Record<string, string> = {
@@ -16,7 +17,8 @@ const categoryLabels: Record<string, string> = {
   "full-stack": "FULL-STACK DEVELOPMENT",
 };
 
-const { project, source } = Astro.props;
+const { project, source, headingLevel = "h3" } = Astro.props;
+const Heading = headingLevel;
 ---
 
 <a href={`/projects/${project.id}`} data-project-source={source} class="block h-full">
@@ -52,9 +54,9 @@ const { project, source } = Astro.props;
         </span>
       </div>
 
-      <h3 class="min-h-14 text-xl leading-7 font-bold tracking-tight text-text-primary sm:min-h-16 sm:text-2xl sm:leading-8">
+      <Heading class="min-h-14 text-xl leading-7 font-bold tracking-tight text-text-primary sm:min-h-16 sm:text-2xl sm:leading-8">
         {project.data.title}
-      </h3>
+      </Heading>
 
       <p class="mt-3 flex-1 text-sm leading-relaxed text-text-secondary">
         {project.data.description}
