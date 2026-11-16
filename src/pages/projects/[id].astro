@@ -2,7 +2,7 @@
 import { getCollection, render } from "astro:content";
 import { Image } from "astro:assets";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { Github, Globe, Download, ExternalLink } from "lucide-astro";
+import { Github, Globe, Download, ExternalLink, ArrowUpRight } from "lucide-astro";
 
 export async function getStaticPaths() {
   const projects = await getCollection("projects");
@@ -132,7 +132,7 @@ const projectActions = [
         class="inline-flex items-center gap-3 text-sm font-medium text-text-primary transition-colors hover:text-accent"
       >
         Explore all projects
-        <span aria-hidden="true">↗</span>
+        <ArrowUpRight size={18} aria-hidden="true" class="transition-transform duration-200" />
       </a>
     </footer>
   </div>

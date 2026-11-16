@@ -21,7 +21,11 @@ const { project, source, headingLevel = "h3" } = Astro.props;
 const Heading = headingLevel;
 ---
 
-<a href={`/projects/${project.id}`} data-project-source={source} class="block h-full">
+<a
+  href={`/projects/${project.id}`}
+  data-project-source={source}
+  class="relative z-0 block h-full text-inherit no-underline transition-transform duration-300 ease-out hover:z-10 hover:scale-[1.01] hover:text-inherit hover:no-underline focus-visible:z-10 focus-visible:scale-[1.01]"
+>
   <article class="group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-surface transition-colors duration-200 hover:border-border-strong">
     <div class="relative flex aspect-16/10 items-center justify-center overflow-hidden bg-surface-elevated p-6 sm:p-8">
       {project.data.cover ? (
@@ -30,7 +34,7 @@ const Heading = headingLevel;
           alt={`Preview of ${project.data.title}`}
           widths={[480, 800, 1200]}
           sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
-          class="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+          class="h-full w-full object-contain"
         />
       ) : (
         <span class="text-xs tracking-widest text-text-secondary">IMAGE COMING SOON</span>
@@ -54,7 +58,7 @@ const Heading = headingLevel;
         </span>
       </div>
 
-      <Heading class="min-h-14 text-xl leading-7 font-bold tracking-tight text-text-primary sm:min-h-16 sm:text-2xl sm:leading-8">
+      <Heading class="min-h-14 text-xl leading-7 font-bold tracking-tight text-text-primary group-hover:underline group-hover:decoration-accent sm:min-h-16 sm:text-2xl sm:leading-8">
         {project.data.title}
       </Heading>
 

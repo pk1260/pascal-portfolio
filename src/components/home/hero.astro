@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import { ArrowUpRight } from "lucide-astro";
 import tokyoImage from "../../assets/hero/tokyo-night.webp";
 import Typewriter from "./typewriter.astro";
 ---
@@ -56,9 +57,7 @@ import Typewriter from "./typewriter.astro";
           class="inline-flex min-h-11 items-center justify-center rounded-sm bg-accent px-6 py-3 text-sm font-bold text-accent-foreground no-underline hover:bg-accent-hover hover:no-underline"
         >
           VIEW MY WORK
-          <span aria-hidden="true" class="ml-3">
-            ↗
-          </span>
+          <ArrowUpRight size={18} aria-hidden="true" class="transition-transform duration-200" />
         </a>
 
         <a
@@ -77,6 +76,9 @@ import Typewriter from "./typewriter.astro";
   >
     TOKYO / JAPAN
   </div>
+  <span class="absolute top-32 left-5 text-xs font-thin hidden lg:block">
+    35.6895° N, 139.6917° E
+  </span>
 
   <div
     aria-hidden="true"
