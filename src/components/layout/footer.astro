@@ -1,0 +1,110 @@
+---
+import { getCollection } from "astro:content";
+import { ArrowUpRight } from "lucide-astro";
+
+const year = new Date().getFullYear();
+
+const navigation = [
+  { label: "Home", href: "/" },
+  { label: "Work", href: "/projects/" },
+  { label: "About", href: "/about/" },
+  { label: "Contact", href: "/contact/" },
+];
+
+const socials = [
+  { label: "GitHub", href: "https://github.com/pk1260" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/pascalkuiper" },
+];
+
+const projects = (await getCollection("projects"))
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 4);
+---
+
+<footer class="border-t border-border bg-surface">
+  <div class="container-page py-12 md:py-16">
+    <div class="grid grid-cols-2 gap-x-8 gap-y-12 lg:grid-cols-4 lg:gap-x-12">
+      <div class="flex flex-col items-start gap-2">
+        <a
+          href="/"
+          aria-label="PK. — Pascal Kuiper, Home"
+          class="text-4xl font-extrabold tracking-tight text-text-primary no-underline transition-colors hover:no-underline"
+        >
+          PK<span class="text-accent-text">.</span>
+        </a>
+
+        <p class="text-sm text-text-secondary">Software Engineer</p>
+      </div>
+
+      <nav aria-label="Footer navigation">
+        <h2 class="mb-5 text-xs font-semibold tracking-[0.12em] text-text-primary uppercase">
+          Information
+        </h2>
+
+        <ul class="space-y-3">
+          {navigation.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class="text-sm text-text-secondary no-underline transition-colors hover:text-accent-text hover:no-underline"
+              >
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <div>
+        <h2 class="mb-5 text-xs font-semibold tracking-[0.12em] text-text-primary uppercase">
+          Socials
+        </h2>
+
+        <ul class="space-y-3">
+          {socials.map((social) => (
+            <li>
+              <a
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group inline-flex items-center gap-1.5 text-sm text-text-secondary no-underline transition-colors hover:text-accent-text hover:no-underline"
+              >
+                {social.label}
+
+                <ArrowUpRight
+                  size={18}
+                  aria-hidden="true"
+                  class="transition-transform duration-200"
+                />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <nav aria-label="Featured projects">
+        <h2 class="mb-5 text-xs font-semibold tracking-[0.12em] text-text-primary uppercase">
+          Projects
+        </h2>
+
+        <ul class="space-y-3">
+          {projects.map((project) => (
+            <li>
+              <a
+                href={`/projects/${project.id}/`}
+                class="text-sm text-text-secondary no-underline transition-colors hover:text-accent-text hover:no-underline"
+              >
+                {project.data.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+
+    <div class="mt-14 flex flex-col gap-3 border-t border-border pt-6 text-xs text-text-secondary sm:flex-row sm:items-center sm:justify-between">
+      <p>© {year} Pascal Kuiper.</p>
+      <p>Designed & developed by Pascal Kuiper.</p>
+    </div>
+  </div>
+</footer>
