@@ -39,3 +39,8 @@ pnpm-debug.log*
 /playwright/.cache/
 /playwright/.auth/
 
+#lighthouse
+/lighthouse-reports/*
+
+# macOS
+.DS_Store
