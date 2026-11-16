@@ -96,7 +96,7 @@ test.describe("Portfolio navigation", () => {
 
     await page.goto("/");
 
-    await page.getByRole("link", { name: "ABOUT ME" }).click();
+    await page.getByRole("link", { name: "ABOUT ME", exact: true }).click();
 
     await expect(page).toHaveURL(/\/about\/?$/);
   });
