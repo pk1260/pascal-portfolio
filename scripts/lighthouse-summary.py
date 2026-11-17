@@ -30,7 +30,7 @@ for device in ("mobile", "desktop"):
             print(f"{device:<9} {page:<18} MISSING")
             continue
 
-        data = json.loads(file.read_text())
+        data = json.loads(file.read_text(encoding="utf-8"))
 
         scores = []
         for key, _ in categories:

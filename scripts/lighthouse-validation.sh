@@ -24,24 +24,20 @@ for device in mobile desktop; do
 
     echo "Running Lighthouse: $device / $name"
 
+    FLAGS=()
+
     if [[ "$device" == "desktop" ]]; then
-      lighthouse "${BASE_URL}${path}" \
-        --preset=desktop \
-        --only-categories=performance,accessibility,best-practices,seo \
-        --output=json \
-        --output=html \
-        --output-path="./${OUTPUT_DIR}/${device}-${name}" \
-        --chrome-flags="--headless" \
-        --quiet
-    else
-      lighthouse "${BASE_URL}${path}" \
-        --only-categories=performance,accessibility,best-practices,seo \
-        --output=json \
-        --output=html \
-        --output-path="./${OUTPUT_DIR}/${device}-${name}" \
-        --chrome-flags="--headless" \
-        --quiet
+      FLAGS+=(--preset=desktop)
     fi
+
+    npx --no-install lighthouse "${BASE_URL}${path}" \
+      "${FLAGS[@]}" \
+      --only-categories=performance,accessibility,best-practices,seo \
+      --output=json \
+      --output=html \
+      --output-path="./${OUTPUT_DIR}/${device}-${name}" \
+      --chrome-flags="--headless" \
+      --quiet
   done
 done
 

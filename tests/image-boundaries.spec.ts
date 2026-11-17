@@ -1,6 +1,14 @@
 import { expect, test } from "@playwright/test";
 
-const routes = ["/", "/projects/", "/about/", "/contact/", "/projects/dingdong/", "/projects/vrcafe/", "/projects/flightcompanion/"];
+const routes = [
+  "/",
+  "/projects/",
+  "/about/",
+  "/contact/",
+  "/projects/dingdong/",
+  "/projects/vrcafe/",
+  "/projects/flightcompanion/",
+];
 const widths = [375, 768, 1024, 1440];
 
 for (const width of widths) {

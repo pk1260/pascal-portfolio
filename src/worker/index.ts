@@ -25,7 +25,17 @@ interface TurnstileResult {
 }
 
 const reply = (message: string, status: number) =>
-  Response.json({ message }, { status, headers: { "Cache-Control": "no-store" } });
+  Response.json(
+    { message },
+    {
+      status,
+      headers: {
+        "Cache-Control": "no-store",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+      },
+    },
+  );
 
 const MAX_BODY_BYTES = 20_000;
 
