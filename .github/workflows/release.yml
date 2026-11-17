@@ -13,8 +13,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Validate and Deploy Portfolio
+  validate:
+    name: Validate Release
     runs-on: ubuntu-latest
 
     steps:
@@ -50,22 +50,99 @@ jobs:
       - name: Prettier
         run: npm run format:check
 
-      - name: Production build
+  build:
+    name: Build Release
+    needs: validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout release
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Turnstile configuration
         run: |
           if [ -z "$PUBLIC_TURNSTILE_SITE_KEY" ]; then
             echo "::error::PUBLIC_TURNSTILE_SITE_KEY is missing."
             exit 1
           fi
-
-          npm run build
         env:
           PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.PUBLIC_TURNSTILE_SITE_KEY }}
 
+      - name: Production build
+        run: npm run build
+        env:
+          PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.PUBLIC_TURNSTILE_SITE_KEY }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-release
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
+
+  test:
+    name: Test Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout release
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: portfolio-release
+          path: dist/
+
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps --only-shell chromium
 
       - name: Playwright tests
         run: npx playwright test
+
+  deploy:
+    name: Deploy to Cloudflare
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout release
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: portfolio-release
+          path: dist/
 
       - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@v4
