@@ -18,11 +18,19 @@ test("theme remains selected across Astro navigation", async ({ page }) => {
   await expect.poll(() => pageBackground(page)).not.toBe(before);
   const selected = await pageBackground(page);
 
-  await page.getByRole("navigation").getByRole("link", { name: "Work", exact: true }).first().click();
+  await page
+    .getByRole("navigation")
+    .getByRole("link", { name: "Work", exact: true })
+    .first()
+    .click();
   await expect(page).toHaveURL(/\/projects\/?$/);
   await expect.poll(() => pageBackground(page)).toBe(selected);
 
-  await page.getByRole("navigation").getByRole("link", { name: "About", exact: true }).first().click();
+  await page
+    .getByRole("navigation")
+    .getByRole("link", { name: "About", exact: true })
+    .first()
+    .click();
   await expect(page).toHaveURL(/\/about\/?$/);
   await expect.poll(() => pageBackground(page)).toBe(selected);
 });
