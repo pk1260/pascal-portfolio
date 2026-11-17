@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const isCI = !!process.env.CI;
+
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: true,
@@ -19,9 +21,11 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: "npm run dev -- --host 127.0.0.1 --port 4321",
+    command: isCI
+      ? "npx astro preview --host 127.0.0.1 --port 4321"
+      : "npm run dev -- --host 127.0.0.1 --port 4321",
     url: "http://127.0.0.1:4321",
-    reuseExistingServer: true,
+    reuseExistingServer: !isCI,
     timeout: 60_000,
   },
 });
