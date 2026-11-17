@@ -2,7 +2,7 @@
 import { getCollection, render } from "astro:content";
 import { Image } from "astro:assets";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { Github, Globe, Download, ExternalLink, ArrowUpRight } from "lucide-astro";
+import { Github, Globe, Download, ExternalLink, ArrowUpRight, Share2 } from "lucide-astro";
 
 export async function getStaticPaths() {
   const projects = await getCollection("projects");
@@ -66,25 +66,41 @@ const projectActions = [
       </p>
     </header>
 
-    {projectActions.length > 0 && (
-      <div class="mt-4 flex flex-wrap gap-3 pb-4">
-        {projectActions.map((action) => {
-          const Icon = action.icon;
+    <div class="mt-4 flex flex-wrap items-center gap-3 pb-4">
+      {projectActions.map((action) => {
+        const Icon = action.icon;
 
-          return (
-            <a
-              href={action.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="group inline-flex items-center gap-2.5 rounded-sm border border-border px-4 py-2.5 text-sm font-medium text-text-primary transition-colors hover:border-accent hover:text-accent"
-            >
-              <Icon size={17} strokeWidth={1.75} aria-hidden="true" />
-              <span>{action.label}</span>
-            </a>
-          );
-        })}
-      </div>
-    )}
+        return (
+          <a
+            href={action.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group inline-flex items-center gap-2.5 rounded-sm border border-border px-4 py-2.5 text-sm font-medium text-text-primary transition-colors hover:border-accent hover:text-accent"
+          >
+            <Icon size={17} strokeWidth={1.75} aria-hidden="true" />
+            <span>{action.label}</span>
+          </a>
+        );
+      })}
+
+      <button
+        id="project-share-button"
+        type="button"
+        data-share-title={project.data.title.trim()}
+        data-share-description={project.data.description}
+        class="inline-flex cursor-pointer items-center gap-2.5 rounded-sm border border-border px-4 py-2.5 text-sm font-medium text-text-primary transition-colors hover:border-accent hover:text-accent"
+      >
+        <Share2 size={17} strokeWidth={1.75} aria-hidden="true" />
+        <span>Share project</span>
+      </button>
+
+      <span
+        id="project-share-feedback"
+        role="status"
+        aria-live="polite"
+        class="text-sm text-secondary"
+      ></span>
+    </div>
 
     {project.data.cover && (
       <div class="mb-4 overflow-hidden rounded-lg border border-border bg-surface-elevated p-5 sm:p-10 lg:p-14">
@@ -166,5 +182,45 @@ const projectActions = [
     }
   }
 
-  document.addEventListener("astro:page-load", updateProjectBackLink);
+  function initializeProjectSharing() {
+    const button = document.querySelector<HTMLButtonElement>("#project-share-button");
+    const feedback = document.querySelector<HTMLElement>("#project-share-feedback");
+
+    if (!button || !feedback || button.dataset.initialized === "true") return;
+
+    button.dataset.initialized = "true";
+
+    button.addEventListener("click", async () => {
+      const url = new URL(window.location.pathname, window.location.origin).href;
+
+      const shareData = {
+        title: button.dataset.shareTitle ?? document.title,
+        text: button.dataset.shareDescription ?? "",
+        url,
+      };
+
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+          return;
+        } catch (error) {
+          if (error instanceof DOMException && error.name === "AbortError") {
+            return;
+          }
+        }
+      }
+
+      try {
+        await navigator.clipboard.writeText(url);
+        feedback.textContent = "Link copied";
+      } catch {
+        feedback.textContent = "Unable to copy link";
+      }
+    });
+  }
+
+  document.addEventListener("astro:page-load", () => {
+    updateProjectBackLink();
+    initializeProjectSharing();
+  });
 </script>
