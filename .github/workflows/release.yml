@@ -51,7 +51,13 @@ jobs:
         run: npm run format:check
 
       - name: Production build
-        run: npm run build
+        run: |
+          if [ -z "$PUBLIC_TURNSTILE_SITE_KEY" ]; then
+            echo "::error::PUBLIC_TURNSTILE_SITE_KEY is missing."
+            exit 1
+          fi
+
+          npm run build
         env:
           PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.PUBLIC_TURNSTILE_SITE_KEY }}
 
