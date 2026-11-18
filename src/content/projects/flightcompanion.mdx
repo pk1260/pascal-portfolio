@@ -1,6 +1,6 @@
 ---
 title: "FlightCompanion"
-description: "Offline-first flight tracker built with C++23 and Qt 6, featuring local flight storage, synchronization, destination weather, and performance research."
+description: "Case study: an offline-first flight tracker in C++23 and Qt 6, and the research behind how it stores and refreshes flight data on unreliable connections."
 technologies:
   - C++23
   - Qt 6
@@ -15,41 +15,89 @@ order: 1
 cover: ../../assets/projects/flightcompanion/flightcompanion-mockup.png
 ---
 
-## Overview
+import ProjectVideo from "../../components/projects/project-video.astro";
 
-**FlightCompanion** is a completed offline-first desktop application built with **C++23** and **Qt 6**. It lets users look up and save flights while keeping their information available when an internet connection is limited or unavailable.
+## The problem
 
-The application reads saved flight data from local storage and uses network requests to update that data when connectivity is available. Alongside the implementation, I carried out research and benchmarks within the completed application to compare storage approaches and synchronization strategies.
+Travellers need flight information most in the places where the internet is worst: at the airport, abroad, or on the move. A flight app that depends on a live connection fails exactly when it matters.
 
-## Highlights
+There was a second constraint. The KLM Flight Status API allows **100 requests per day**. So the app can't simply ask again every time the user looks; it has to decide when new data is worth a request.
 
-- **Flight lookup and saving** using the KLM Flight Status API.
-- **Offline access to saved flights**, including a clear indication when displayed information comes from local storage.
-- **Offline route map** drawn using a bundled world map, without depending on a network connection for the map itself.
-- **Destination weather at the expected arrival time**, retrieved through Open-Meteo.
-- **Status-based refresh scheduling** designed around a limit of 100 API requests per day.
-- **Automatic synchronization** when the connection becomes available again.
+**The question:** how do you keep flight information both available and up to date, when you can't always reach the API, and can only ask a limited number of times?
+
+## My role
+
+A solo project for the Code Exploration Lab at Hogeschool Leiden. I designed and built the application, set up the research, wrote the measurement tools, and analysed the results. It was also my way of learning Modern C++ and Qt.
+
+## The solution
+
+FlightCompanion is a desktop app for looking up and saving flights, built **offline-first**: everything the user sees comes from local storage, and the network is only used to keep that storage up to date.
+
+- **Flight lookup and saving** through the KLM Flight Status API
+- **Saved flights available offline**, with a clear notice when information comes from local storage
+- **Route map** drawn from a world map bundled with the app, so it works without a connection
+- **Destination weather** for the expected arrival time, through Open-Meteo
+- **Status-based refreshing** that spends requests where they matter
+- **Automatic sync** once the connection returns, and a counter showing requests left today
+
+<ProjectVideo
+  src="/videos/flightcompanion/flightcompanion-app.webm"
+  mp4="/videos/flightcompanion/flightcompanion-app.mp4"
+  title="FlightCompanion desktop application demonstration"
+  size="large"
+  presentation
+/>
+
+## Key design decisions
+
+**The window never talks to the API.** Every lookup goes through a service that decides whether the saved version is still good enough, or whether to ask KLM. Local storage is the single source of truth, so the interface behaves the same online and offline.
+
+**Strategies behind an interface.** The decision "should I refresh this flight?" lives in interchangeable strategy classes. The current time is passed in rather than read inside, so the same code runs in the app, in unit tests with a fixed clock, and in a simulation that replays a full travel day in a second.
+
+**Check the connection before asking.** If the system reports no connection, the app shows the saved flight straight away instead of waiting for a request to time out.
 
 ## Research
 
-I researched how to keep flight information available and sufficiently up to date with limited network access. This involved a storage benchmark and a simulated travel day using the completed application.
+I investigated two questions, quantitatively, using measurement tools built on the app's own code.
 
-- **SQLite updated a single flight up to 85× faster than JSON** in the measured benchmark, where the JSON approach rewrote the entire file after a change.
-- **Status-based refreshing used 29% fewer requests** than refreshing every five minutes in the measured scenario, while maintaining the same observed freshness.
-- **Checking connectivity before making a request** reduced the measured offline wait from 14.5 seconds to effectively immediate feedback.
+### Where to store flights
 
-The figures reflect the benchmark conditions and simulated scenarios, rather than guaranteed performance in every environment.
+I compared JSON, CBOR, SQLite, and SQLite with a transaction, all through the same storage interface, from 1 to 1,000 flights, each operation measured 20 times.
 
-## What I Learned
+- **SQLite updated a single flight up to 85× faster than JSON.** JSON rewrites the whole file on every change; SQLite changes one row.
+- **One transaction made saving all flights 8× faster**, removing SQLite's only weak spot.
+- **CBOR, a binary form of JSON, was barely faster**, showing the cost came from rewriting the file rather than from the text format.
 
-- **Designing around interfaces** so storage implementations and synchronization strategies can be swapped and compared fairly.
-- **Writing asynchronous network operations** while keeping application state consistent as the user continues working.
-- **Managing memory and debugging C++/Qt applications**, including tracing a crash that occurred only in Release builds.
-- **Questioning measurements**, especially after identifying an artefact that initially made one strategy appear better than it was.
+### When to refresh
 
-## Status
+The daily limit made live testing impossible, so I simulated a travel day: a flight that is delayed, gets a gate, boards, departs and lands. I compared seven strategies on two measures: API requests, and **stale views**, moments where the user saw a status, time or gate that was no longer correct.
 
-**Completed.** Both the desktop application and its associated research were finished. The features listed above were implemented and working, and the research findings were measured as part of the project.
+- **There is no universal best choice.** Fewer requests always meant more stale information.
+- **Status-based refreshing used 29% fewer requests** than refreshing every five minutes, with the same share of stale views, and was the only strategy under 2% stale views that stayed within the daily limit.
+- **In the app itself**, checking connectivity first cut the offline wait from **14.5 seconds** to immediate.
+
+These figures come from the benchmark conditions and simulated scenarios, not from guaranteed performance in every environment.
+
+## Challenges
+
+**Asynchronous requests.** Responses arrive later, while the user is already doing something else. I made each request carry what it belongs to, ignored answers that are no longer relevant, and queued background sync so the user's own searches always go first.
+
+**A Release-only crash.** Everything worked in Debug, but clicking a saved flight crashed the Release build. Using the debugger's backtrace, I traced it to a developer-only view that didn't exist in Release. The fix: always create the object, and let only its visibility depend on the build.
+
+**A result that looked too good.** In my first simulation, one strategy showed zero stale views. It turned out every event fell on a round number of minutes, matching that strategy's refresh interval exactly. Shifting the events to realistic times removed the artefact, and changed the conclusion.
+
+## Outcome
+
+- All must-have and should-have requirements were delivered
+- The research answered both questions, and its conclusions are built into the app: SQLite storage, status-based refreshing, and a connection check before every request
+- Unit tests cover the flight model, storage, sync strategies, amenities and weather; the benchmark and simulation write CSV results, so every figure can be reproduced
+
+## What I learned
+
+- **Designing around interfaces** makes implementations easy to swap and fair to compare.
+- **Asynchronous code** is about _when_ things happen, not only _what_ happens.
+- **Memory management in C++ and Qt**: parent-child ownership, RAII for files and connections, and optional values instead of nullable pointers.
+- **Question your own measurements**, especially the ones that confirm what you hoped to see.
 
 ## Credits
 

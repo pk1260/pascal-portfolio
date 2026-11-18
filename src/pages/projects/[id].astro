@@ -109,6 +109,9 @@ const projectActions = [
           alt={`Preview of ${project.data.title}`}
           widths={[640, 960, 1280, 1600]}
           sizes="(max-width: 768px) 100vw, 1200px"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
           class="h-auto w-full object-contain"
         />
       </div>

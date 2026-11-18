@@ -1,6 +1,6 @@
 ---
 title: "VRcafe Haarlem Website"
-description: "A production rebuild of VRcafe Haarlem's WordPress/Elementor website using Astro, with measured improvements in mobile performance and a comprehensive SEO audit."
+description: "Rebuilt VRcafe Haarlem's WordPress website with Astro, combining a modular frontend, automated media optimization, and performance research that reduced mobile LCP by 78%."
 technologies:
   - Astro
   - TypeScript
@@ -21,45 +21,133 @@ cover: ../../assets/projects/vrcafe/vrcafe-mockup.png
 website: "https://www.vrcafehaarlem.nl/"
 ---
 
+import ProjectVideo from "../../components/projects/project-video.astro";
+
 ## Overview
 
-A complete rebuild of the website for VRcafe Haarlem, a virtual reality venue. The original website used WordPress and Elementor and suffered from slow loading times, particularly on mobile. Some pages took more than 16 seconds to display their main content.
+During my internship at **VRcafe Haarlem**, a virtual reality entertainment venue, I worked on rebuilding its existing WordPress and Elementor website using **Astro**, supported by a **Node.js/Express backend**.
 
-I rebuilt the website using **Astro** with a **Node.js/Express** backend, preserving the venue's visual identity while improving the underlying architecture and performance. The new website is **live in production**. Its forms, booking integration, media processing, testing, and deployment workflow were implemented as part of the completed project.
+The goal was to deliver a faster, more maintainable website without losing the venue's visual identity or essential functionality. My work covered **frontend architecture, backend integrations, media optimization, performance research, and automated deployment**.
 
-## Highlights
+Beyond rebuilding the website, I investigated rendering strategies and measured the impact of different optimization techniques. The completed website was deployed to production, with an average **78% reduction in mobile Largest Contentful Paint (LCP)** across eight representative pages.
 
-- **Static site generation in Astro**, selected after comparing SSG, SSR, and ISR in terms of loading performance and server resource usage.
-- **Atomic Design component structure**, from shared layouts to reusable buttons and typography.
-- **JSON-driven content**, validated with JSON schemas and typed with TypeScript, allowing page variants such as business outings and children's parties to share templates.
-- **Embedded booking integration**, with email and phone fallbacks if the booking iframe fails to load.
-- **Forms with live validation**, delivered through Mailjet.
-- **Python and FFmpeg media pipeline** converting images to WebP and videos to WebM, retaining a conversion only when it saves at least 30% of the file size.
-- **Lazy loading and explicit media dimensions** to reduce unnecessary transfers and prevent layout shifts.
-- **Responsive interface** built with Tailwind CSS.
-- **Automated CI/CD with GitHub Actions**, including Playwright tests, Astro builds, deployment of the client and server to a VPS, and PM2 restarts.
+## The Challenge
 
-## Research
+The original WordPress website suffered from significant performance issues. Some mobile pages recorded **LCP times exceeding 16 seconds**, while large media files, Elementor-generated layouts, and third-party scripts contributed to slow loading and unnecessary resource usage.
 
-I compared the original website with the **final production implementation** using repeated Lighthouse and PageSpeed Insights measurements across eight representative pages on mobile and desktop. The results were evaluated as averages rather than relying on a single run.
+Maintaining the website was also difficult. Similar pages relied on repeated layouts, and the existing architecture offered limited flexibility for structural improvements. A technical SEO audit revealed duplicate metadata, missing sitemap and robots.txt files, and absent structured data.
 
-- **Average mobile Largest Contentful Paint improved by 78%**, from 8.96 s to 1.95 s. Speed Index improved by 62%, and First Contentful Paint by 55%.
-- **Lazy loading alone reduced LCP by 28%** and brought Total Blocking Time from 775 ms to approximately 1 ms in the corresponding tests.
-- **Media processing reduced the total media payload by approximately 70%**, from 3,561 MB to 1,054 MB across more than 17,000 files. JPEG files achieved average savings of 81%.
-- **An audit of the original site's SEO** identified 123 pages, including 75 with the same meta description, and missing sitemap, robots.txt, and structured data.
-- **Desktop results were mixed:** First Contentful Paint improved by 30% and Speed Index by 26%, while Largest Contentful Paint worsened by 29%. This highlighted the need to inspect above-the-fold content rather than treat every metric as an automatic success.
+The challenge was to rebuild the website **within the venue's existing design and functional requirements**, while improving performance, reducing dependencies, and creating an architecture that would be easier to extend and maintain.
 
-These figures describe the measured test results; they are not claims about every visitor's real-world experience.
+## Rebuilding the Website
 
-## What I Learned
+I developed the new frontend using **Astro, TypeScript, and Tailwind CSS**, separating static page generation from functionality handled by the Express backend.
 
-- **One measurement is not a result.** Lighthouse runs varied enough that I switched to repeated measurements, averages, and automated collection using batch scripts and Python.
-- **The fastest rendering strategy is not always the best architectural choice.** SSR was slightly faster in some tests, but SSG suited a website with approximately 98% static content. ISR remained a potential option for a future blog.
-- **Not every asset benefits from conversion.** Some AVIF files were already efficient, so the media pipeline compared output sizes and preserved the original when savings were too small.
-- **Lab measurements have limits.** Lighthouse tests provide a controlled comparison, while real-user monitoring would be needed to confirm performance for actual visitors.
-- **Negative results are useful.** The worse desktop LCP prompted closer investigation into what the browser was loading above the fold.
-- **Testing benefits from explicit planning.** Although automated checks ran in CI, the project showed me why a formal test plan and coverage reporting should be established from the start.
+The component structure follows **Atomic Design**, with reusable elements organized into atoms, molecules, organisms, and page templates. Shared layouts manage navigation, metadata, and common page structure, while individual components remain focused on specific responsibilities.
 
-## Status
+To avoid duplicating similar pages, I implemented **JSON-driven content configurations** with schema validation and TypeScript types. This allowed pages for business events, educational activities, and children's parties to reuse the same templates while displaying different content.
 
-**Completed and live in production.** The website, backend integrations, automated testing, and deployment pipeline were implemented and delivered. The performance comparisons above were made using the final production implementation.
+The rebuild also included:
+
+- **Responsive layouts** adapted to mobile, tablet, and desktop.
+- **Embedded booking functionality**, with email and telephone fallbacks if the booking iframe fails.
+- **Contact forms with live validation**, connected to Mailjet through the backend.
+- **Lazy-loaded images and videos**, with explicit dimensions to reduce unnecessary loading and layout shifts.
+- **Reusable SEO metadata**, providing a consistent foundation for page titles and descriptions.
+
+The result was a modular website that preserved the original experience while replacing the underlying WordPress and Elementor implementation.
+
+<ProjectVideo
+  src="/videos/vrcafe/vrcafe-web.webm"
+  mp4="/videos/vrcafe/vrcafe-web.mp4"
+  title="VRcafe Haarlem website and booking experience"
+/>
+
+<ProjectVideo
+  src="/videos/vrcafe/vrcafe-mob.webm"
+  mp4="/videos/vrcafe/vrcafe-mob.mp4"
+  title="VRcafe Haarlem responsive mobile experience"
+  size="small"
+  presentation
+/>
+
+## Automated Media Optimization
+
+Media was one of the largest contributors to the original website's loading and storage requirements. The existing asset collection contained thousands of images and videos, making manual optimization impractical.
+
+I developed a **Python and FFmpeg processing pipeline** to convert suitable images to WebP and videos to WebM using VP9. The pipeline compared each converted file against its original and retained the conversion only when it achieved at least **30% file-size savings**.
+
+This was important because newer formats were not always more efficient. Some existing AVIF files, for example, were already sufficiently compressed and offered little benefit from conversion.
+
+The pipeline processed **17,678 assets**, reducing the combined media size from approximately **3,561 MB to 1,054 MB**, a **70.4% reduction**. JPEG images achieved average savings of 81%.
+
+The optimization work also extended to browser loading behavior, ensuring that below-the-fold media did not compete unnecessarily with content needed for the initial page render.
+
+## Engineering Decisions
+
+### Choosing a Rendering Strategy
+
+Rather than assuming that static generation would always provide the best performance, I compared **Static Site Generation (SSG), Server-Side Rendering (SSR), and Incremental Static Regeneration (ISR)** for the Astro implementation.
+
+The research used **Lighthouse, ApacheBench, and server resource monitoring** to evaluate page loading performance, request handling, and server CPU usage.
+
+The results showed trade-offs between the approaches. SSR performed slightly better in some individual tests, but introduced request-time rendering work that offered limited value for this particular website.
+
+With approximately **98% static content**, SSG provided the most suitable balance of performance, simplicity, and maintainability. It allowed the majority of pages to be generated during the build process rather than rendered for every visitor.
+
+ISR remained a potential option for future features requiring more frequently updated content, such as a blog.
+
+### Optimizing Loading Behavior
+
+I also investigated how individual media-loading optimizations affected performance rather than attributing every improvement to the framework change.
+
+In a separate experiment across four media-heavy pages, **lazy loading reduced average LCP by 28%**, from 3.02 s to 2.17 s. Speed Index improved by 62%, while Total Blocking Time decreased from 775 ms to approximately 1 ms.
+
+These findings helped prioritize improvements that reduced initial browser work, including deferred media loading, modern asset formats, and explicit media dimensions.
+
+### Testing and Deployment
+
+I implemented a **GitHub Actions CI/CD pipeline** to automate testing, building, and deployment of the frontend and backend to a VPS.
+
+The workflow included Astro builds and **Playwright end-to-end tests** covering important user interactions. The backend was deployed separately and managed with **PM2** for process restarts.
+
+I also used automated Lighthouse runs and Python-based analysis to collect and compare performance measurements.
+
+This made it possible to evaluate changes more consistently and reduced the manual work involved in delivering updates.
+
+## Performance & SEO Research
+
+To evaluate the completed rebuild, I compared the original WordPress website against the final Astro implementation using **repeated Lighthouse and PageSpeed Insights measurements**.
+
+The comparison covered eight representative pages on mobile and desktop, with results averaged across multiple runs rather than relying on individual scores.
+
+On mobile, the results showed:
+
+- **Largest Contentful Paint improved by 78%**, from 8.96 s to 1.95 s.
+- **First Contentful Paint improved by 55%**, from 4.19 s to 1.90 s.
+- **Speed Index improved by 62%**, from 9.97 s to 3.76 s.
+- **Total Blocking Time decreased by approximately 98%**, from 145 ms to 3 ms.
+
+Desktop results were more mixed. First Contentful Paint improved by 30% and Speed Index by 26%, but **Largest Contentful Paint worsened by 29%**.
+
+This was an important finding: reducing the overall page weight did not automatically improve every metric. The desktop result highlighted the need for further investigation into above-the-fold content and rendering priorities.
+
+Alongside performance testing, I conducted a **Screaming Frog SEO audit** of the original website. Across 123 HTML pages, the audit identified 75 pages with identical meta descriptions, 42 with duplicate or missing titles, and missing sitemap, robots.txt, and structured data.
+
+These findings informed the new website's SEO architecture and demonstrated why performance, page structure, and search engine accessibility needed to be considered together.
+
+The reported performance improvements reflect controlled laboratory measurements, not independently verified changes in real-user traffic, search rankings, or conversions.
+
+## Results & Reflection
+
+The project delivered a **production Astro website**, supported by a reusable component architecture, Express backend integrations, automated media processing, and a GitHub Actions deployment workflow.
+
+The strongest measured outcomes were a **78% reduction in average mobile LCP** and a **70.4% reduction in total media size**. These improvements addressed two of the original website's most significant technical problems.
+
+Not every result was positive. Desktop LCP increased despite improvements in other metrics, showing that performance optimization requires more than reducing asset sizes or replacing a framework. Real User Monitoring would also be needed to confirm how the measured improvements translate to actual visitor experiences.
+
+The project also highlighted areas for improving my own development process. Although automated tests were integrated into CI/CD, establishing a formal test plan and coverage reporting earlier would have made verification more systematic.
+
+The most valuable lesson was that **performance engineering is about measuring trade-offs, not simply chasing higher Lighthouse scores**. The choice of rendering strategy, media formats, loading behavior, and application architecture all depended on the website's actual requirements.
+
+This project strengthened my ability to investigate an existing system, justify technical decisions through benchmarking, and turn research findings into a maintainable production implementation.

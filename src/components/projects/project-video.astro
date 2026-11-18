@@ -4,38 +4,97 @@ interface Props {
   mp4?: string;
   title: string;
   captions?: string;
+  size?: "full" | "medium" | "small";
+  maxHeight?: number;
+  presentation?: boolean;
 }
 
-const { src, mp4, title, captions } = Astro.props;
+const { src, mp4, title, captions, size = "full", maxHeight, presentation = false } = Astro.props;
+
+const sizeClasses = {
+  full: "w-full",
+  large: "w-full max-w-[800px]",
+  medium: "w-full max-w-[600px]",
+  small: "w-full max-w-[300px]",
+};
 ---
 
 <figure class="my-8">
-  <div class="project-video-container relative overflow-hidden rounded-lg border border-border bg-surface-elevated">
-    <video
-      class="project-video block h-auto w-full cursor-pointer"
-      muted
-      loop
-      playsinline
-      preload="none"
-      aria-label={`${title}. Click to pause or resume playback.`}
-      tabindex="0"
+  <div
+    class:list={[
+      "relative flex w-full items-center justify-center overflow-hidden rounded-lg",
+      presentation
+        ? "border border-border bg-surface-elevated px-6 py-10 sm:px-12 sm:py-14"
+        : "bg-transparent",
+    ]}
+  >
+    <div
+      class:list={[
+        "project-video-container group relative overflow-hidden rounded-lg border border-border bg-surface",
+        sizeClasses[size],
+      ]}
     >
-      <source src={src} type="video/webm" />
-      {mp4 && <source src={mp4} type="video/mp4" />}
-      {captions && <track kind="captions" src={captions} srclang="en" label="English" />}
-      Your browser does not support HTML video.
-    </video>
+      <video
+        class="project-video block h-auto w-full cursor-pointer object-contain"
+        style={maxHeight ? `max-height: ${maxHeight}px;` : undefined}
+        muted
+        loop
+        playsinline
+        preload="none"
+        aria-label={`${title}. Press Enter or Space to pause or resume playback.`}
+        tabindex="0"
+      >
+        <source src={src} type="video/webm" />
+        {mp4 && <source src={mp4} type="video/mp4" />}
+        {captions && <track kind="captions" src={captions} srclang="en" label="English" />}
+        Your browser does not support HTML video.
+      </video>
 
-    <div class="pointer-events-none absolute inset-x-0 bottom-0 h-0.75 bg-black/20">
       <div
-        class="project-video-progress h-full w-full origin-left bg-accent"
-        style="transform: scaleX(0);"
-      ></div>
+        class="project-video-play-indicator pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200"
+        aria-hidden="true"
+      >
+        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-black/65 text-white">
+          <svg
+            class="project-video-play-icon h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M8 5v14l11-7z"></path>
+          </svg>
+        </div>
+      </div>
+
+      <div class="pointer-events-none absolute inset-x-0 bottom-0 h-0.75 bg-black/20">
+        <div
+          class="project-video-progress h-full w-full origin-left bg-accent"
+          style="transform: scaleX(0);"
+        ></div>
+      </div>
     </div>
   </div>
 
   <figcaption class="mt-3 text-sm text-secondary">{title}</figcaption>
 </figure>
+
+<style>
+  .project-video-container[data-paused="true"][data-manually-paused="true"]
+    .project-video-play-indicator {
+    opacity: 1;
+  }
+
+  .project-video-container:focus-within {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .project-video-play-indicator {
+      transition: none;
+    }
+  }
+</style>
 
 <script>
   function initializeProjectVideos() {
@@ -65,15 +124,14 @@ const { src, mp4, title, captions } = Astro.props;
 
       video.dataset.initialized = "true";
 
-      const progress = video.parentElement?.querySelector<HTMLElement>(".project-video-progress");
+      const container = video.closest<HTMLElement>(".project-video-container");
+      const progress = container?.querySelector<HTMLElement>(".project-video-progress");
 
-      let animationFrame: number;
+      let animationFrame = 0;
 
       function updateProgress() {
         if (progress && Number.isFinite(video.duration) && video.duration > 0) {
-          const percentage = (video.currentTime / video.duration) * 100;
-
-          progress.style.transform = `scaleX(${percentage / 100})`;
+          progress.style.transform = `scaleX(${video.currentTime / video.duration})`;
         }
 
         if (!video.paused && !video.ended) {
@@ -81,13 +139,33 @@ const { src, mp4, title, captions } = Astro.props;
         }
       }
 
+      function updatePlaybackState() {
+        if (container) {
+          container.dataset.paused = String(video.paused);
+        }
+      }
+
+      function togglePlayback() {
+        if (video.paused) {
+          video.dataset.manuallyPaused = "false";
+          if (container) container.dataset.manuallyPaused = "false";
+          video.play().catch(() => {});
+        } else {
+          video.dataset.manuallyPaused = "true";
+          if (container) container.dataset.manuallyPaused = "true";
+          video.pause();
+        }
+      }
+
       video.addEventListener("play", () => {
         cancelAnimationFrame(animationFrame);
+        updatePlaybackState();
         updateProgress();
       });
 
       video.addEventListener("pause", () => {
         cancelAnimationFrame(animationFrame);
+        updatePlaybackState();
       });
 
       video.addEventListener("seeked", () => {
@@ -96,30 +174,16 @@ const { src, mp4, title, captions } = Astro.props;
         }
       });
 
-      video.addEventListener("click", () => {
-        if (video.paused) {
-          video.dataset.manuallyPaused = "false";
-          video.play().catch(() => {});
-        } else {
-          video.dataset.manuallyPaused = "true";
-          video.pause();
-        }
-      });
+      video.addEventListener("click", togglePlayback);
 
       video.addEventListener("keydown", (event) => {
         if (event.key !== "Enter" && event.key !== " ") return;
 
         event.preventDefault();
-
-        if (video.paused) {
-          video.dataset.manuallyPaused = "false";
-          video.play().catch(() => {});
-        } else {
-          video.dataset.manuallyPaused = "true";
-          video.pause();
-        }
+        togglePlayback();
       });
 
+      updatePlaybackState();
       observer.observe(video);
     });
   }
