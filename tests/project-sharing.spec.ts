@@ -58,7 +58,11 @@ test.describe("Project sharing", () => {
 
       await expect(page).toHaveURL(new RegExp(`/projects/${slug}/?$`));
 
-      await page.getByRole("button", { name: "Share project" }).click();
+      const shareButton = page.getByRole("button", { name: "Share project" });
+
+      await expect(shareButton).toHaveAttribute("data-initialized", "true");
+
+      await shareButton.click();
 
       await expect(page.getByRole("status")).toHaveText("Link copied");
 
