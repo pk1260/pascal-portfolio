@@ -1,8 +1,18 @@
-
+import argparse
 import json
 from pathlib import Path
 
-report_dir = Path("lighthouse-reports")
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "environment",
+    choices=["local", "prod"],
+    default="local",
+    nargs="?",
+)
+
+args = parser.parse_args()
+
+report_dir = Path("lighthouse-reports") / args.environment
 
 categories = [
     ("performance", "Perf"),
@@ -11,19 +21,22 @@ categories = [
     ("seo", "SEO"),
 ]
 
+pages = [
+    "home",
+    "about",
+    "contact",
+    "work",
+    "dingdong",
+    "flightcompanion",
+    "vrcafe",
+]
+
+print(f"\nEnvironment: {args.environment}\n")
 print(f"{'Device':<9} {'Page':<18} {'Perf':>6} {'A11y':>6} {'Best':>6} {'SEO':>6}")
 print("-" * 59)
 
 for device in ("mobile", "desktop"):
-    for page in (
-        "home",
-        "about",
-        "contact",
-        "work",
-        "dingdong",
-        "flightcompanion",
-        "vrcafe",
-    ):
+    for page in pages:
         file = report_dir / f"{device}-{page}.report.json"
 
         if not file.exists():
@@ -33,9 +46,9 @@ for device in ("mobile", "desktop"):
         data = json.loads(file.read_text(encoding="utf-8"))
 
         scores = []
+
         for key, _ in categories:
-            category = data.get("categories", {}).get(key, {})
-            score = category.get("score")
+            score = data.get("categories", {}).get(key, {}).get("score")
 
             scores.append(
                 f"{round(score * 100):>6}"
@@ -44,4 +57,3 @@ for device in ("mobile", "desktop"):
             )
 
         print(f"{device:<9} {page:<18} {''.join(scores)}")
-
