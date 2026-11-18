@@ -1,20 +1,22 @@
 ---
 title: "Dingdong"
-description: "Room preview web application and deep-link integration for Dingdong, using Next.js, Cloudflare Workers, Django, and Expo, with technical handover."
+description: "Designed and built a web-to-app room sharing experience, spanning a Next.js preview platform, Django integrations API, and deep linking in an Expo application."
 technologies:
   - Next.js
   - TypeScript
-  - Cloudflare Workers
   - Tailwind CSS
   - Zod
+  - Cloudflare Workers
   - Django REST API
+  - PostgreSQL
   - Expo
   - Expo Router
+  - Expo SecureStore
   - AppsFlyer OneLink
   - Detour
   - Jest
   - GitHub Actions
-category: web
+category: full-stack
 status: completed
 order: 2
 cover: ../../assets/projects/dingdong/dingdong-mockup.png
@@ -22,83 +24,82 @@ website: "https://dingdong-nederland.nl/aanbod"
 download: "https://play.google.com/store/apps/details?id=nl.dingdong.app"
 ---
 
+import ProjectVideo from "../../components/projects/project-video.astro";
+
 ## Overview
 
-As part of my graduation internship at **Dingdong**, a student housing platform, I developed a **room preview web application** and implemented deep-link integration in the existing Expo mobile app.
+During my graduation internship at **Dingdong**, a housing platform for students and young professionals, I worked on the infrastructure connecting shared room listings to the mobile application. My responsibilities covered **backend APIs, a public Next.js web platform, and deep-link integration** in the existing Expo app.
 
-The web preview allows someone opening a shared room link to see the listing before installing the app. The architecture was designed to guide users from the preview into the corresponding room in the mobile application, including journeys involving an app-store installation.
+The goal was straightforward for users: open a shared link, preview the room without installing anything, and continue to that same room in the app. Delivering that experience required changes across several systems, from room identifiers and public data access to link handling and mobile navigation.
 
-The **Detour integration was implemented**, but the complete end-to-end deep-link journey had **not yet been verified** at the time of handover. Final integration and device-level testing were deliberately transferred to the incoming development team.
+## The Challenge
 
-## Highlights
+Dingdong already supported sharing links, but the journey was incomplete. Generated links did not consistently carry a room's `public_code`, so recipients could land on a generic app screen instead of the listing they expected. Deep-link context was held in memory and could be lost across app restarts. There was also **no public room preview**, meaning people were asked to install the app before seeing the room.
 
-- **Room-specific preview pages** with photos, details, tags, and a map, deployed using Next.js on Cloudflare Workers.
-- **Image gallery consistent with the mobile app**, with fallbacks across room photos, group pictures, and house photos to handle listings with incomplete media.
-- **Privacy-aware map presentation** displaying an approximate area rather than the room's exact address.
-- **Overview page** for active room listings.
-- **Deep-link call to action** constructing an AppsFlyer OneLink URL containing the room's opaque `public_code`.
-- **Implemented Detour integration in Expo**, including a `DetourProvider` for deferred links, a `+native-intent` entry point for incoming links, and a `DetourBridge` designed to pass them to the existing `DeepLinkStore`.
-- **Deep-link platform configuration work**, including Detour-related associated-domain and intent-filter settings without removing the existing AppsFlyer configuration.
-- **SEO implementation**, including Open Graph metadata, structured data, sitemap, robots rules, and the exclusion of inactive listings from indexing.
-- **Separate development and production Cloudflare Workers** with their own secrets and domains.
-- **CI pipeline**, including tests, build validation, deployment jobs, ESLint, and Jest coverage thresholds.
+The challenge was to improve this flow **within the existing Django, Expo, and AppsFlyer stack**, while keeping the implementation maintainable and creating a foundation for measuring the web-to-app journey.
 
-## Architecture
+## Building the Web Platform
 
-```text
-Shared room link
-  → dingdong-kamers.nl/aanbod/rooms/[public_code]
-  → Next.js room preview on Cloudflare Workers
-  → Django REST API (single-room endpoint, API key)
-  → Open-in-app CTA / AppsFlyer OneLink
-  → Intended destination: corresponding room in the mobile app
-```
+I developed a public room browsing and preview application with **Next.js**, deployed on **Cloudflare Workers**. It provides an overview of available rooms and a dedicated page for each listing, with room details, photos, and a call to action to open the mobile app.
 
-Room data is validated with **Zod** at the API boundary and mapped to an internal model so that unexpected API changes can surface as validation errors rather than silently producing malformed pages.
+Room data is fetched from the Django API, validated with **Zod**, and mapped into an internal model. For listings with incomplete media, the gallery falls back between room photos, group pictures, and house images, removing duplicates along the way. The interface also uses approximate map locations rather than exposing precise addresses.
 
-The app-side integration brings together three deep-link entry paths:
+Because these pages are shared outside the app, I implemented **Open Graph metadata** and search indexing rules so links produce useful previews and inactive listings are excluded from indexing.
 
-- **AppsFlyer OneLink** for attribution and installation-related journeys.
-- **Detour** for supported incoming links and deferred-link handling.
-- **`useLinkHandler`** as an existing custom-URI fallback.
+<ProjectVideo
+  src="/videos/dingdong/dingdong-web.webm"
+  mp4="/videos/dingdong/dingdong-web.mp4"
+  title="Dingdong room browsing and web preview"
+/>
 
-The integration was designed to direct these paths into the existing **`DeepLinkStore`** and **`DeepLinkCoordinator`**, avoiding a separate routing implementation for each provider. The complete journey across devices and installation states still required end-to-end verification.
+## Backend & External Integrations
 
-## What I Learned
+The web platform needed a reliable source of public room data. I developed a new **Django `integrations` application** that supports both the preview website and external partners.
 
-- **Build-time versus runtime configuration.** Variables prefixed with `NEXT_PUBLIC_` are embedded during the build. I traced an incorrect OneLink destination pointing to `localhost` to the interaction between local and production environment variables.
-- **Cloudflare deployment constraints.** Worker custom domains need the appropriate Cloudflare zone configuration, and image optimization behaved differently on Workers than in local development.
-- **Deep linking is an end-to-end system.** OneLink templates, Universal Links, App Links, store redirects, and app routing can fail independently. Testing with an internal beta already installed can obscure the actual new-user journey.
-- **Integrating with existing architecture.** The goal was to add Detour without replacing the application's established deep-link coordination and routing layers.
-- **Separating implementation from verification.** An unexplained `item not found` result remained during testing. Without the required logs and clean-device verification, I documented the limitation rather than claiming that the entire journey worked.
-- **Time-zone consistency in delta sync.** I investigated a `since` filter that appeared to omit a room and traced the discrepancy to mixing UTC and local timestamps, recommending consistent UTC normalization.
-- **Handling data-driven UI edge cases**, including listings with a single photo, missing group pictures, or inactive status.
-- **Isolating deployment environments**, with separate Workers, environment-specific secrets, and safer deployment configuration.
+The integration layer includes **API-key authentication**, management tools for partner keys, and separate serializers for different consumers. Public room responses expose the information needed to render a listing without returning sensitive details such as exact addresses or coordinates. Partner-facing responses support broader integration requirements.
 
-## Status
+I also implemented endpoints for retrieving a room by its `public_code` and for **bulk synchronization** with external services. While working with an external partner, I refined synchronization behavior and normalized timestamps to UTC to avoid inconsistent results across systems.
 
-**Completed — graduation internship.** The agreed work was delivered with technical documentation and a handover to the incoming team.
+## Connecting Web and Mobile
 
-### Delivered
+The preview's **Open in app** action generates an **AppsFlyer OneLink** containing the room's `public_code`. For users with the app installed, Universal Links on iOS and App Links on Android connect the incoming link to the Expo application, where the existing `DeepLinkCoordinator` directs the user to the matching room. Routing accounts for both guest and authenticated users.
 
-- Room preview web application, gallery, and room overview.
-- Cloudflare Workers environment and deployment configuration.
-- CI pipeline and associated checks.
-- `.well-known` association files for Universal Links and App Links.
-- Detour integration code in the Expo application.
-- Technical documentation and handover instructions.
+The installed-app flow was validated on iOS and Android.
 
-### Handed over for follow-up
+<ProjectVideo
+  src="/videos/dingdong/dingdong-app.webm"
+  mp4="/videos/dingdong/dingdong-app.mp4"
+  title="Dingdong web-to-app deep linking demonstration"
+  size="small"
+  presentation
+/>
 
-- Mount or verify the `DetourBridge` in the app layout as required by the final integration.
-- Investigate the remaining `item not found` error on test links.
-- Verify the complete link journey on clean physical devices, including installation flows.
-- Finalize or verify the `dingdong-kamers.nl` associated-domain and intent-filter configuration in the app.
-- Replace the hardcoded share link in the Django backend with a dynamic value.
-- Add further unit tests for `src/lib`.
+I also worked on **persisting pending deep-link context with Expo SecureStore** so the room identifier can survive app restarts and onboarding transitions. This addressed a weakness in the previous in-memory approach.
 
-The internship assignment was completed, but **the Detour flow was not claimed to be fully end-to-end validated** at the time of handover.
+The installed-app flow was validated on **iOS and Android**. A fresh-install journey was more difficult: the store redirect worked, but AppsFlyer did not reliably restore the original room identifier after installation during acceptance testing. Reopening the same link after installation did work.
 
-## Credits
+As follow-up integration work, I added **Detour-related code and configuration** alongside AppsFlyer, including an incoming-link entry point and a bridge intended to feed the existing routing architecture. This work was handed over without claiming that the full Detour flow had been verified end to end on clean devices.
 
-Maps by [Google Maps Platform](https://developers.google.com/maps) · Deep linking with [AppsFlyer OneLink](https://www.appsflyer.com/) and [Detour by Software Mansion](https://docs.swmansion.com/detour/) · Hosting on [Cloudflare Workers](https://workers.cloudflare.com/)
+## Engineering Decisions
+
+### Choosing the web framework
+
+Rather than selecting a framework solely on familiarity, I benchmarked **Django templates, Next.js, and React Native Web** for the public preview layer. The comparison covered response time, load handling, page performance, and social-sharing metadata.
+
+In the live-API benchmark, **Next.js with Incremental Static Regeneration (ISR)** handled **455 requests per second**, compared with **323** for Next.js without ISR and **7.72** for the tested Django implementation. These were results from a specific test setup, not general performance claims about the frameworks. Combined with complete Open Graph support and room-page rendering needs, the findings supported choosing Next.js.
+
+### Keeping the system maintainable
+
+I separated the public web layer, Django integrations API, and mobile routing responsibilities rather than combining them into one tightly coupled flow. The web application validates API responses at the boundary, while link providers feed into the app's existing coordination logic instead of requiring separate navigation systems.
+
+### Deployment and verification
+
+I configured **development and production Cloudflare Workers**, environment-specific settings, and a **GitHub Actions** pipeline with build and test checks. Testing covered backend authentication and responses, web interactions, missing images and invalid room identifiers, and mobile linking scenarios. I also resolved configuration issues involving build-time `NEXT_PUBLIC_` variables and OneLink destinations.
+
+## Results & Reflection
+
+The project delivered a **production webpreview platform**, a reusable **Django integrations API**, and a working **installed-app deep-link flow** on iOS and Android. During the reporting period, Cloudflare Analytics recorded **more than 11,000 visits** to the webpreview pages. That shows the pages were being accessed in production, but does not establish an increase in app installs or conversions.
+
+Not every original objective was fully achieved. **Deferred deep linking after a fresh installation remained unresolved** in acceptance testing, and the desired end-to-end funnel measurements could not be fully validated with the available AppsFlyer plan. The later Detour integration work also required further device-level verification. I documented these limits and handed over the remaining integration work.
+
+The most valuable lesson was that **cross-platform features succeed or fail at their boundaries**. A correct frontend, API, or mobile route is not enough on its own; identifiers, configuration, state, and installation behavior must remain consistent across the entire journey. This project strengthened how I investigate existing systems, justify architecture choices with evidence, and communicate unfinished work clearly.
