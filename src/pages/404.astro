@@ -1,0 +1,34 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const title = "Page Not Found | Pascal Kuiper";
+const description = "The page you're looking for doesn't exist or may have moved.";
+---
+
+<BaseLayout title={title} description={description}>
+  <main class="container-page flex min-h-[70vh] flex-col items-center justify-center py-24 text-center">
+    <p class="mb-5 font-mono text-sm font-medium tracking-widest text-accent">ERROR / 404</p>
+
+    <h1 class="text-6xl font-semibold tracking-tight sm:text-8xl">Page not found.</h1>
+
+    <p class="mt-6 max-w-md text-base leading-relaxed text-secondary">
+      The page you're looking for doesn't exist or may have moved.
+    </p>
+
+    <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+      <a
+        href="/"
+        class="rounded-sm bg-text-primary px-5 py-3 text-sm font-medium text-background transition-opacity hover:opacity-80"
+      >
+        Back to home
+      </a>
+
+      <a
+        href="/projects"
+        class="rounded-sm border border-border px-5 py-3 text-sm font-medium transition-colors hover:border-accent hover:text-accent"
+      >
+        Explore projects
+      </a>
+    </div>
+  </main>
+</BaseLayout>
