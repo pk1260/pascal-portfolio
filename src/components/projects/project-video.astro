@@ -1,4 +1,7 @@
 ---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
 interface Props {
   src: string;
   mp4?: string;
@@ -11,9 +14,23 @@ interface Props {
 
 const { src, mp4, title, captions, size = "full", maxHeight, presentation = false } = Astro.props;
 
+const posters = import.meta.glob<{ default: ImageMetadata }>("../../assets/videos/*-poster.webp", {
+  eager: true,
+});
+
+const videoName = src
+  .split("/")
+  .pop()
+  ?.replace(/\.[^.]+$/, "");
+const posterPath = `../../assets/videos/${videoName}-poster.webp`;
+const poster = posters[posterPath]?.default;
+
+if (!poster) {
+  throw new Error(`Missing video poster for ${src}. Expected: ${posterPath}`);
+}
+
 const sizeClasses = {
   full: "w-full",
-  large: "w-full max-w-[800px]",
   medium: "w-full max-w-[600px]",
   small: "w-full max-w-[300px]",
 };
@@ -30,13 +47,16 @@ const sizeClasses = {
   >
     <div
       class:list={[
-        "project-video-container group relative overflow-hidden rounded-lg border border-border bg-surface",
+        "project-video-container group relative w-full overflow-hidden rounded-lg border border-border bg-surface",
         sizeClasses[size],
       ]}
+      style={{
+        aspectRatio: `${poster.width} / ${poster.height}`,
+        maxHeight: maxHeight ? `${maxHeight}px` : undefined,
+      }}
     >
       <video
-        class="project-video block h-auto w-full cursor-pointer object-contain"
-        style={maxHeight ? `max-height: ${maxHeight}px;` : undefined}
+        class="project-video absolute inset-0 h-full w-full cursor-pointer object-contain"
         muted
         loop
         playsinline
@@ -49,6 +69,15 @@ const sizeClasses = {
         {captions && <track kind="captions" src={captions} srclang="en" label="English" />}
         Your browser does not support HTML video.
       </video>
+
+      <Image
+        src={poster}
+        alt=""
+        loading="eager"
+        fetchpriority="low"
+        decoding="async"
+        class="project-video-poster pointer-events-none absolute inset-0 h-full w-full object-contain"
+      />
 
       <div
         class="project-video-play-indicator pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200"
@@ -79,6 +108,15 @@ const sizeClasses = {
 </figure>
 
 <style>
+  .project-video-poster {
+    opacity: 1;
+    transition: opacity 350ms ease;
+  }
+
+  .project-video-container[data-playing="true"] .project-video-poster {
+    opacity: 0;
+  }
+
   .project-video-container[data-paused="true"][data-manually-paused="true"]
     .project-video-play-indicator {
     opacity: 1;
@@ -90,6 +128,7 @@ const sizeClasses = {
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .project-video-poster,
     .project-video-play-indicator {
       transition: none;
     }
@@ -116,7 +155,7 @@ const sizeClasses = {
           video.play().catch(() => {});
         }
       },
-      { threshold: 0.5 },
+      { threshold: 0.25 },
     );
 
     videos.forEach((video) => {
@@ -128,6 +167,7 @@ const sizeClasses = {
       const progress = container?.querySelector<HTMLElement>(".project-video-progress");
 
       let animationFrame = 0;
+      let bufferingTimeout = 0;
 
       function updateProgress() {
         if (progress && Number.isFinite(video.duration) && video.duration > 0) {
@@ -145,14 +185,36 @@ const sizeClasses = {
         }
       }
 
+      function showVideo() {
+        window.clearTimeout(bufferingTimeout);
+
+        if (container) {
+          container.dataset.playing = "true";
+        }
+      }
+
+      function showPoster() {
+        if (container) {
+          container.dataset.playing = "false";
+        }
+      }
+
       function togglePlayback() {
         if (video.paused) {
           video.dataset.manuallyPaused = "false";
-          if (container) container.dataset.manuallyPaused = "false";
+
+          if (container) {
+            container.dataset.manuallyPaused = "false";
+          }
+
           video.play().catch(() => {});
         } else {
           video.dataset.manuallyPaused = "true";
-          if (container) container.dataset.manuallyPaused = "true";
+
+          if (container) {
+            container.dataset.manuallyPaused = "true";
+          }
+
           video.pause();
         }
       }
@@ -163,8 +225,23 @@ const sizeClasses = {
         updateProgress();
       });
 
+      video.addEventListener("playing", () => {
+        showVideo();
+      });
+
+      video.addEventListener("waiting", () => {
+        window.clearTimeout(bufferingTimeout);
+
+        bufferingTimeout = window.setTimeout(() => {
+          if (!video.paused) {
+            showPoster();
+          }
+        }, 350);
+      });
+
       video.addEventListener("pause", () => {
         cancelAnimationFrame(animationFrame);
+        window.clearTimeout(bufferingTimeout);
         updatePlaybackState();
       });
 
@@ -172,6 +249,11 @@ const sizeClasses = {
         if (progress && Number.isFinite(video.duration) && video.duration > 0) {
           progress.style.transform = `scaleX(${video.currentTime / video.duration})`;
         }
+      });
+
+      video.addEventListener("error", () => {
+        window.clearTimeout(bufferingTimeout);
+        showPoster();
       });
 
       video.addEventListener("click", togglePlayback);
