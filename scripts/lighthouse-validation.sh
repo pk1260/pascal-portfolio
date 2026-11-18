@@ -61,7 +61,7 @@ for environment in "${ENVIRONMENTS[@]}"; do
         FLAGS+=(--preset=desktop)
       fi
 
-      npx --no-install lighthouse "${BASE_URL}${path}" \
+      npx --silent --no-install lighthouse "${BASE_URL}${path}" \
         "${FLAGS[@]}" \
         --only-categories=performance,accessibility,best-practices,seo \
         --output=json \
