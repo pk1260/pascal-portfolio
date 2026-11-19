@@ -104,7 +104,29 @@ const projects = (await getCollection("projects"))
 
     <div class="mt-14 flex flex-col gap-3 border-t border-border pt-6 text-xs text-text-secondary sm:flex-row sm:items-center sm:justify-between">
       <p>© {year} Pascal Kuiper.</p>
-      <p>Designed & developed by Pascal Kuiper.</p>
+
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <button
+          type="button"
+          id="cookie-preferences"
+          class="cursor-pointer text-xs text-text-secondary transition-colors hover:text-accent-text"
+        >
+          Cookie preferences
+        </button>
+
+        <p>Designed & developed by Pascal Kuiper.</p>
+      </div>
     </div>
   </div>
 </footer>
+
+<script>
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+
+    if (!(target instanceof Element)) return;
+    if (!target.closest("#cookie-preferences")) return;
+
+    document.querySelector<HTMLButtonElement>("#cookie-consent-reopen")?.click();
+  });
+</script>
