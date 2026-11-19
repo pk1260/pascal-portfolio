@@ -72,6 +72,16 @@
   }
 }
 
+:root {
+  --cc-bg: var(--surface);
+  --cc-fg: var(--text-primary);
+  --cc-accent: var(--accent);
+  --cc-accent-fg: var(--accent-foreground);
+  --cc-border: var(--border);
+  --cc-radius: var(--radius-button);
+  --cc-font: var(--font-sans);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
@@ -196,6 +206,38 @@
   }
 }
 
+.cc-banner {
+  background: var(--surface) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-card) !important;
+  box-shadow: none !important;
+  font-family: var(--font-sans) !important;
+}
+
+.cc-title {
+  color: var(--text-primary) !important;
+}
+
+.cc-banner p {
+  color: var(--text-secondary) !important;
+}
+
+.cc-accept {
+  background-color: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+  border: 1px solid var(--accent) !important;
+}
+
+.cc-decline {
+  background-color: transparent !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-strong) !important;
+}
+
+.cc-accept:hover {
+  background-color: var(--accent-hover) !important;
+}
 /* Accessibility preferences | Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -216,5 +258,22 @@
 @media (forced-colors: active) {
   :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
     outline: 3px solid Highlight;
+  }
+}
+
+@media (max-width: 640px) {
+  .cc-banner {
+    left: 50% !important;
+    right: auto !important;
+    bottom: 1rem !important;
+    transform: translateX(-50%) !important;
+
+    width: calc(100% - 2rem) !important;
+    max-width: 26rem !important;
+    margin: 0 !important;
+  }
+
+  .cc-actions {
+    justify-content: center !important;
   }
 }
