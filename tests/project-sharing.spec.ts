@@ -78,6 +78,31 @@ test.describe("Project sharing", () => {
     }
   });
 
+  for (const slug of projects) {
+    test(`${slug} shares only the project URL through the Web Share API`, async ({ page }) => {
+      await page.addInitScript(() => {
+        Object.defineProperty(navigator, "share", {
+          configurable: true,
+          value: async (data: ShareData) => {
+            (window as Window & { __sharedData?: ShareData }).__sharedData = data;
+          },
+        });
+      });
+
+      await page.goto(`/projects/${slug}/`);
+
+      await page.getByRole("button", { name: "Share project" }).click();
+
+      const sharedData = await page.evaluate(
+        () => (window as Window & { __sharedData?: ShareData }).__sharedData,
+      );
+
+      expect(sharedData).toEqual({
+        url: new URL(`/projects/${slug}/`, page.url()).href,
+      });
+    });
+  }
+
   test("cancelling native sharing does not copy the URL", async ({ page }) => {
     await page.addInitScript(() => {
       Object.defineProperty(navigator, "share", {
