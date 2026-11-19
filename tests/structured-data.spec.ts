@@ -145,10 +145,19 @@ test("structured data URLs match canonical URLs", async ({ page }) => {
   }
 });
 
-test("404 page does not expose structured data", async ({ page }) => {
+test("custom 404 page displays navigation without structured data", async ({ page }) => {
   const response = await page.goto("/this-page-does-not-exist/");
 
   expect(response?.status()).toBe(404);
+
+  await expect(page.getByRole("heading", { name: "Page not found." })).toBeVisible();
+
+  await expect(page.getByRole("link", { name: "Back to home" })).toHaveAttribute("href", "/");
+
+  await expect(page.getByRole("link", { name: "Explore projects" })).toHaveAttribute(
+    "href",
+    "/projects",
+  );
 
   await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(0);
 });
