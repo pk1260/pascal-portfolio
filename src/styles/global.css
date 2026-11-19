@@ -46,6 +46,7 @@
   --accent: #fc7e00;
   --accent-text: #fc7e00;
   --accent-foreground: #111111;
+  --accent-hover: #ff9a33;
 
   --focus-ring: #fc7e00;
 }
@@ -223,6 +224,13 @@
   color: var(--text-secondary) !important;
 }
 
+.cc-accept,
+.cc-decline {
+  min-height: 44px !important;
+  border-radius: var(--radius-button) !important;
+  font-weight: 500 !important;
+}
+
 .cc-accept {
   background-color: var(--accent) !important;
   color: var(--accent-foreground) !important;
@@ -238,6 +246,23 @@
 .cc-accept:hover {
   background-color: var(--accent-hover) !important;
 }
+
+.cc-decline:hover {
+  border-color: var(--accent) !important;
+}
+
+.cc-reopen {
+  display: none !important;
+}
+
+.cc-banner[data-cc-embedded] {
+  position: fixed !important;
+  left: 1rem !important;
+  bottom: 1rem !important;
+  z-index: 9999 !important;
+  width: min(400px, calc(100% - 2rem)) !important;
+}
+
 /* Accessibility preferences | Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -262,7 +287,7 @@
 }
 
 @media (max-width: 640px) {
-  .cc-banner {
+  .cc-banner[data-cc-embedded] {
     left: 50% !important;
     right: auto !important;
     bottom: 1rem !important;
@@ -271,9 +296,5 @@
     width: calc(100% - 2rem) !important;
     max-width: 26rem !important;
     margin: 0 !important;
-  }
-
-  .cc-actions {
-    justify-content: center !important;
   }
 }

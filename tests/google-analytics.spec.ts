@@ -100,7 +100,7 @@ test.describe("Google Analytics consent", () => {
   test("allows visitors to change their preferences", async ({ page }) => {
     await page.getByRole("button", { name: "Reject" }).click();
 
-    await page.getByRole("button", { name: "Change cookie preferences" }).click();
+    await page.getByRole("button", { name: "Cookie preferences", exact: true }).click();
 
     await expect(page.getByText("A little about privacy.")).toBeVisible();
 
@@ -186,7 +186,7 @@ test.describe("Google Analytics production behavior", () => {
 
     await expect.poll(() => gtm.requests).toBe(1);
 
-    await page.getByRole("button", { name: "Change cookie preferences" }).click();
+    await page.getByRole("button", { name: "Cookie preferences", exact: true }).click();
 
     await page.getByRole("button", { name: "Reject" }).click();
 
@@ -237,5 +237,62 @@ test.describe("Google Analytics production behavior", () => {
     });
 
     expect(preserved).toBe("preserved");
+  });
+
+  test("keeps the consent banner visible during Astro navigation", async ({ page }) => {
+    await page.goto("/");
+
+    const banner = page.locator(".cc-banner");
+
+    await expect(banner).toBeVisible();
+
+    const navigation = page.getByRole("navigation", {
+      name: "Main navigation",
+    });
+
+    for (const route of [
+      { name: "Work", path: /\/projects\/?$/ },
+      { name: "About", path: /\/about\/?$/ },
+      { name: "Contact", path: /\/contact\/?$/ },
+      { name: "Home", path: /\/$/ },
+    ]) {
+      await navigation.getByRole("link", { name: route.name, exact: true }).click();
+
+      await expect(page).toHaveURL(route.path);
+      await expect(banner).toBeVisible();
+    }
+  });
+
+  test("reopens cookie preferences from the footer", async ({ page }) => {
+    await page.goto("/");
+
+    await page.getByRole("button", { name: "Reject" }).click();
+
+    await expect(page.locator(".cc-banner")).toBeHidden();
+
+    await page.getByRole("button", { name: "Cookie preferences" }).click();
+
+    await expect(page.locator(".cc-banner")).toBeVisible();
+  });
+
+  test("can change cookie preferences after Astro navigation", async ({ page }) => {
+    await page.goto("/");
+
+    await page.getByRole("button", { name: "Reject" }).click();
+
+    await page
+      .getByRole("navigation", { name: "Main navigation" })
+      .getByRole("link", { name: "Work" })
+      .click();
+
+    await expect(page).toHaveURL(/\/projects\/?$/);
+
+    await page.getByRole("button", { name: "Cookie preferences" }).click();
+
+    await expect(page.locator(".cc-banner")).toBeVisible();
+
+    await page.getByRole("button", { name: "Accept" }).click();
+
+    await expect(page.locator(".cc-banner")).toBeHidden();
   });
 });
