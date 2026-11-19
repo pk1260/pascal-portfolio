@@ -3,6 +3,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import SectionHeading from "../components/ui/section-heading.astro";
 import { ArrowUpRight, Github, Linkedin, Mail } from "lucide-astro";
 import ContactForm from "../components/contact/contact-form.astro";
+import { createContactPageSchema } from "../lib/structured-data";
+const structuredData = createContactPageSchema(Astro.site!);
 
 const pageDescription = {
   title: "Contact | Pascal Kuiper",
@@ -42,7 +44,11 @@ const contactMethods = [
 ];
 ---
 
-<BaseLayout title={pageDescription.title} description={pageDescription.description}>
+<BaseLayout
+  title={pageDescription.title}
+  description={pageDescription.description}
+  structuredData={structuredData}
+>
   <main class="container-page pb-24 md:pb-32">
     <SectionHeading {...pageHeading} level="h1" />
 
