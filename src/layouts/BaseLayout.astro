@@ -3,7 +3,9 @@ import Header from "../components/layout/header.astro";
 import Footer from "../components/layout/footer.astro";
 import GoogleTagManager from "../components/analytics/google-tag-manager.astro";
 import ConsentBanner from "astro-cookie-consent/ConsentBanner.astro";
+import StructuredData from "../components/seo/structured-data.astro";
 import { ClientRouter } from "astro:transitions";
+import type { Thing, WithContext } from "schema-dts";
 import "../styles/global.css";
 
 interface Props {
@@ -12,6 +14,7 @@ interface Props {
   fullBleed?: boolean;
   image?: string;
   imageAlt?: string;
+  structuredData?: WithContext<Thing> | WithContext<Thing>[];
 }
 
 const {
@@ -20,6 +23,7 @@ const {
   fullBleed = false,
   image = "/og/default.png",
   imageAlt = "Pascal Kuiper portfolio preview",
+  structuredData,
 } = Astro.props;
 
 const cleanDescription = description.trim().replace(/\s+/g, " ");
@@ -58,6 +62,8 @@ const imageURL = new URL(image, Astro.site);
     <link rel="icon" type="image/png" sizes="96x96" href="/pk-favicon.png" />
     <link rel="icon" type="image/svg+xml" href="/pk-favicon.svg" />
     <title>{title}</title>
+
+    {structuredData && <StructuredData schema={structuredData} />}
 
     <script is:inline>
       (() => {

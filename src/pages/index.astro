@@ -5,15 +5,23 @@ import SelectedWork from "../components/home/selected-work.astro";
 import AboutPreview from "../components/home/about-preview.astro";
 import Technologies from "../components/home/technologies.astro";
 import ContactCta from "../components/home/contact-cta.astro";
+import { createPersonSchema, createWebsiteSchema } from "../lib/structured-data";
 
 const pageDescription = {
   title: "Home | Pascal Kuiper",
   description:
     "Explore the portfolio of Pascal Kuiper, a software engineer building web and mobile applications, exploring technologies, and solving real-world problems.",
 };
+
+const structuredData = [createPersonSchema(Astro.site!), createWebsiteSchema(Astro.site!)];
 ---
 
-<BaseLayout title={pageDescription.title} description={pageDescription.description} fullBleed>
+<BaseLayout
+  title={pageDescription.title}
+  description={pageDescription.description}
+  structuredData={structuredData}
+  fullBleed
+>
   <Hero />
   <SelectedWork />
   <AboutPreview />

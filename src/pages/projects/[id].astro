@@ -3,6 +3,7 @@ import { getCollection, render } from "astro:content";
 import { Image } from "astro:assets";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { Github, Globe, Download, ExternalLink, ArrowUpRight, Share2 } from "lucide-astro";
+import { createProjectSchema, createProjectBreadcrumbSchema } from "../../lib/structured-data";
 
 export async function getStaticPaths() {
   const projects = await getCollection("projects");
@@ -23,6 +24,11 @@ const pageDescription = {
   imageAlt: `${project.data.title.trim()} project preview`,
 };
 
+const structuredData = [
+  createProjectSchema(Astro.site!, project),
+  createProjectBreadcrumbSchema(Astro.site!, project),
+];
+
 const projectActions = [
   { label: "GitHub", href: project.data.github, icon: Github },
   { label: "Live Website", href: project.data.website, icon: Globe },
@@ -31,7 +37,7 @@ const projectActions = [
 ].filter((action) => Boolean(action.href));
 ---
 
-<BaseLayout {...pageDescription}>
+<BaseLayout {...pageDescription} structuredData={structuredData}>
   <div class="container-page pb-24 md:pb-32">
     <div class="mb-2">
       <a

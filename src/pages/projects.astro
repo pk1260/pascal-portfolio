@@ -3,6 +3,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 import ProjectCard from "../components/projects/project-card.astro";
 import SectionHeading from "../components/ui/section-heading.astro";
+import { createWorkPageSchema } from "../lib/structured-data";
+
+const structuredData = createWorkPageSchema(Astro.site!);
 
 const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
 
@@ -19,7 +22,11 @@ const pageHeading = {
 };
 ---
 
-<BaseLayout title={pageDescription.title} description={pageDescription.description}>
+<BaseLayout
+  title={pageDescription.title}
+  description={pageDescription.description}
+  structuredData={structuredData}
+>
   <main class="container-page pb-24 md:pb-32">
     <SectionHeading {...pageHeading} level="h1" />
 
