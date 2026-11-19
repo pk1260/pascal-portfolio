@@ -202,11 +202,7 @@ const projectActions = [
     button.addEventListener("click", async () => {
       const url = new URL(window.location.pathname, window.location.origin).href;
 
-      const shareData = {
-        title: button.dataset.shareTitle ?? document.title,
-        text: button.dataset.shareDescription ?? "",
-        url,
-      };
+      const shareData = { url };
 
       if (navigator.share) {
         try {
