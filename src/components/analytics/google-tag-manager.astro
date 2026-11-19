@@ -1,0 +1,31 @@
+<script>
+  import { gateScript, getConsent, onConsentChange, whenAccepted } from "astro-cookie-consent";
+
+  const GTM_ID = "GTM-PMCB6SFF";
+  const isProduction = window.location.hostname === "pascal-kuiper.nl";
+
+  if (isProduction) {
+    let analyticsActive = false;
+
+    whenAccepted(() => {
+      analyticsActive = true;
+
+      window.dataLayer = window.dataLayer || [];
+
+      window.dataLayer.push({
+        "gtm.start": Date.now(),
+        event: "gtm.js",
+      });
+
+      gateScript({
+        src: `https://www.googletagmanager.com/gtm.js?id=${GTM_ID}`,
+      });
+    });
+
+    onConsentChange(() => {
+      if (analyticsActive && getConsent() !== "accept") {
+        window.location.reload();
+      }
+    });
+  }
+</script>
