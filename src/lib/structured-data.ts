@@ -10,7 +10,7 @@ import type {
   WithContext,
 } from "schema-dts";
 
-export function createPersonSchema(site: URL): WithContext<Person> {
+export function createPersonSchema(site: URL) {
   const baseURL = site.href.replace(/\/$/, "");
 
   return {
@@ -21,7 +21,7 @@ export function createPersonSchema(site: URL): WithContext<Person> {
     url: `${baseURL}/`,
     jobTitle: "Software Engineer",
     sameAs: ["https://github.com/pk1260", "https://www.linkedin.com/in/pascalkuiper"],
-  };
+  } satisfies WithContext<Person>;
 }
 
 export function createWebsiteSchema(site: URL): WithContext<WebSite> {
@@ -43,6 +43,7 @@ export function createWebsiteSchema(site: URL): WithContext<WebSite> {
 export function createProfilePageSchema(site: URL): WithContext<ProfilePage> {
   const baseURL = site.href.replace(/\/$/, "");
   const pageURL = `${baseURL}/about/`;
+  const person = createPersonSchema(site);
 
   return {
     "@context": "https://schema.org",
@@ -51,7 +52,12 @@ export function createProfilePageSchema(site: URL): WithContext<ProfilePage> {
     url: pageURL,
     name: "About Pascal Kuiper",
     mainEntity: {
-      "@id": `${baseURL}/#person`,
+      "@type": "Person",
+      "@id": person["@id"],
+      name: person.name,
+      url: person.url,
+      jobTitle: person.jobTitle,
+      sameAs: person.sameAs,
     },
     isPartOf: {
       "@id": `${baseURL}/#website`,
