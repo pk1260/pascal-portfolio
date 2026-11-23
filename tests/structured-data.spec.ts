@@ -152,6 +152,10 @@ test("custom 404 page displays navigation without structured data", async ({ pag
 
   await expect(page.getByRole("heading", { name: "Page not found." })).toBeVisible();
 
+  await expect(
+    page.getByText("The page you're looking for doesn't exist or may have moved."),
+  ).toBeVisible();
+
   await expect(page.getByRole("link", { name: "Back to home" })).toHaveAttribute("href", "/");
 
   await expect(page.getByRole("link", { name: "Explore projects" })).toHaveAttribute(
@@ -160,6 +164,11 @@ test("custom 404 page displays navigation without structured data", async ({ pag
   );
 
   await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(0);
+
+  await page.getByRole("link", { name: "Back to home" }).click();
+
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page).not.toHaveURL(/this-page-does-not-exist/);
 });
 
 test("all pages contain expected structured data", async ({ page }) => {
