@@ -8,7 +8,14 @@ interface Schema {
   "@id"?: string;
   name?: string;
   url?: string;
-  mainEntity?: { "@id": string };
+  mainEntity?: {
+    "@type": string;
+    "@id": string;
+    name: string;
+    url?: string;
+    jobTitle?: string;
+    sameAs?: string[];
+  };
   itemListElement?: {
     "@type": string;
     position: number;
@@ -44,7 +51,7 @@ test.describe("Structured data", () => {
     expect(website?.url).toBe(`${SITE_URL}/`);
   });
 
-  test("about page includes ProfilePage referencing Person", async ({ page }) => {
+  test("about page includes a valid ProfilePage with a Person entity", async ({ page }) => {
     await page.goto("/about/");
 
     const schemas = await getSchemas(page);
@@ -52,7 +59,20 @@ test.describe("Structured data", () => {
 
     expect(profile).toBeDefined();
     expect(profile?.["@id"]).toBe(`${SITE_URL}/about/#profile`);
-    expect(profile?.mainEntity?.["@id"]).toBe(`${SITE_URL}/#person`);
+    expect(profile?.url).toBe(`${SITE_URL}/about/`);
+
+    expect(profile?.mainEntity).toMatchObject({
+      "@type": "Person",
+      "@id": `${SITE_URL}/#person`,
+      name: "Pascal Kuiper",
+      url: `${SITE_URL}/`,
+      jobTitle: "Software Engineer",
+    });
+
+    expect(profile?.mainEntity?.sameAs).toEqual([
+      "https://github.com/pk1260",
+      "https://www.linkedin.com/in/pascalkuiper",
+    ]);
   });
 
   for (const project of [
