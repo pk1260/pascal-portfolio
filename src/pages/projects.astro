@@ -27,7 +27,7 @@ const pageHeading = {
   description={pageDescription.description}
   structuredData={structuredData}
 >
-  <main class="container-page pb-24 md:pb-32">
+  <div class="container-page pb-24 md:pb-32">
     <SectionHeading {...pageHeading} level="h1" />
 
     <div class="mb-8 flex items-center justify-between border-b border-border pb-4">
@@ -41,5 +41,5 @@ const pageHeading = {
         <ProjectCard project={project} source="work" headingLevel="h2" />
       ))}
     </section>
-  </main>
+  </div>
 </BaseLayout>
